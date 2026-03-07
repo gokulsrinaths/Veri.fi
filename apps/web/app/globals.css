@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 98%;
+    --primary: 160 84% 39%;
+    --primary-foreground: 0 0% 9%;
+    --border: 0 0% 14.9%;
+    --radius: 1rem;
+  }
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+  }
+}
+
+.skip-link {
+  @apply absolute left-4 top-4 z-[100] -translate-y-full rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-black transition focus:translate-y-0 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-black;
+}
+
+.focus-ring {
+  @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black;
+}
+
+body {
+  @apply bg-black text-foreground antialiased;
+}

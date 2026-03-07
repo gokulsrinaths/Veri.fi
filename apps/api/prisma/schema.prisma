@@ -1,0 +1,92 @@
+// This is your Prisma schema file for veri.fi API
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  walletAddress  String    @unique
+  role           String    @default("PARTICIPANT") // SPONSOR | PARTICIPANT | BOTH
+  createdAt      DateTime  @default(now())
+  tasks          Task[]
+  submissions    Submission[]
+  reputations    Reputation[]
+}
+
+model Task {
+  id                  String    @id @default(uuid())
+  sponsorId           String
+  sponsor             User      @relation(fields: [sponsorId], references: [id], onDelete: Cascade)
+  title               String
+  description         String
+  category            String    // DePIN, RWA, Retail, etc.
+  targetLatitude      Float
+  targetLongitude     Float
+  radiusMeters        Int
+  requiredProofType   String    // PHOTO | VIDEO
+  expectedObjectLabel String
+  rewardAmount        String
+  rewardToken         String
+  confidenceThreshold Float    // 0-1
+  maxSubmissions      Int
+  status              String   @default("OPEN") // DRAFT, OPEN, CLOSED, EXPIRED, CANCELLED
+  metadataJson        Json?
+  scoringWeightsJson  Json?    // { location, time, visual, liveness, antiFraud }
+  deadline            DateTime?
+  onchainTaskId       String?
+  createdAt           DateTime  @default(now())
+  submissions         Submission[]
+}
+
+model Submission {
+  id                  String    @id @default(uuid())
+  taskId              String
+  task                Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  participantId       String
+  participant         User      @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  mediaUrl            String
+  mediaType           String
+  capturedLatitude    Float?
+  capturedLongitude   Float?
+  capturedAt          DateTime
+  exifJson            Json?
+  verificationStatus  String    @default("PENDING") // PENDING, VERIFYING, VERIFIED, REJECTED, PAID
+  verificationScore   Float?
+  scoreBreakdownJson  Json?
+  evidenceHash        String?
+  sessionToken        String?
+  onchainSubmissionId String?
+  txHash              String?
+  createdAt           DateTime  @default(now())
+  verificationResult  VerificationResult?
+}
+
+model VerificationResult {
+  id             String     @id @default(uuid())
+  submissionId   String     @unique
+  submission     Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  locationScore  Float
+  timeScore      Float
+  visualScore    Float
+  livenessScore  Float
+  antiFraudScore Float
+  finalScore     Float
+  decision       String    // ACCEPT | REJECT
+  explanation    String
+  createdAt      DateTime  @default(now())
+}
+
+model Reputation {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  successfulCount  Int      @default(0)
+  rejectedCount    Int      @default(0)
+  trustMultiplier  Float    @default(1.0)
+}
