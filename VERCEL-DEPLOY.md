@@ -1,37 +1,26 @@
 # Vercel deploy — veri.fi
 
-## Critical: Root Directory must be `apps/web`
+## Root Directory must be `apps/web`
 
-The error `packages/shared build$ tsup` and `next: command not found` means **Root Directory is set to the repo root** (or empty). Vercel then runs `npm run build` at root, which builds ALL packages (including packages/shared) instead of only the web app.
-
-**Fix:** Set **Root Directory** to **`apps/web`** in Vercel:
+Set **Root Directory** to **`apps/web`** so Vercel builds only the Next.js app:
 
 1. Vercel Dashboard → your project → **Settings** → **General**
-2. **Root Directory** → Edit → type **`apps/web`** (no leading slash) → Save
-3. **Redeploy**
+2. **Root Directory** → Edit → **`apps/web`** (no leading slash) → Save
+3. Redeploy
 
 ---
 
-## If Root Directory is repo root (fallback)
+## Install and build (no pnpm — avoids registry errors)
 
-A `vercel.json` at repo root sets `installCommand: pnpm install` and `buildCommand: pnpm run build:web` so only the web app is built (not packages/shared). But **Next.js deployment works best when Root Directory = apps/web**. Prefer that.
+`apps/web` includes a **package-lock.json** and **vercel.json** so Vercel uses **npm** instead of pnpm. That avoids `ERR_PNPM_META_FETCH_FAIL` / `ERR_INVALID_THIS` on the npm registry.
 
----
+- **Install:** `npm install`
+- **Build:** `npm run build`
 
-## Build & Development Settings
-
-**Clear any overrides** so vercel.json is used:
-
-- **Settings** → **Build & Development Settings**
-- **Install Command:** leave **empty**
-- **Build Command:** leave **empty**
-
-When Root Directory = `apps/web`, `apps/web/vercel.json` uses:
-- **Install:** no-op
-- **Build:** `cd ../.. && pnpm install && pnpm run build:web`
+Leave **Install Command** and **Build Command** empty in the dashboard so this config is used.
 
 ---
 
-## Redeploy
+## If you changed overrides
 
-After changing settings: **Deployments** → **⋯** on latest → **Redeploy**, or push a new commit.
+Clear them: **Settings** → **Build & Development Settings** → leave Install and Build **empty**, then redeploy.
