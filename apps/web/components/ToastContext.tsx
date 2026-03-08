@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 type Toast = { id: number; message: string };
 
@@ -18,6 +19,22 @@ export function useToast() {
   if (!show) return () => {};
   return show;
 }
+
+const toastVariants = {
+  hidden: { opacity: 0, x: 24, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    transition: { type: "spring", stiffness: 400, damping: 28 },
+  },
+  exit: {
+    opacity: 0,
+    x: 24,
+    scale: 0.96,
+    transition: { duration: 0.2 },
+  },
+};
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -34,17 +51,21 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={showToast}>
       {children}
       <div
-        className="fixed bottom-4 left-4 right-4 z-50 flex flex-col gap-2 sm:left-auto sm:right-4 sm:max-w-sm"
+        className="fixed bottom-6 left-4 right-4 z-50 flex flex-col gap-3 sm:left-auto sm:right-6 sm:max-w-sm"
         aria-live="polite"
       >
-        <AnimatePresence>
+        <AnimatePresence mode="popLayout">
           {toasts.map((t) => (
             <motion.div
               key={t.id}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              className="rounded-xl bg-emerald-500/95 px-4 py-3 text-sm font-medium text-black shadow-lg backdrop-blur"
+              layout
+              variants={toastVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className={cn(
+                "rounded-xl border border-primary/20 bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 backdrop-blur-sm"
+              )}
             >
               {t.message}
             </motion.div>

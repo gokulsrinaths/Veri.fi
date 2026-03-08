@@ -6,7 +6,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const task = getTask(id);
-  if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
-  return NextResponse.json(task);
+  try {
+    const task = await getTask(id);
+    if (!task) return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    return NextResponse.json(task);
+  } catch (e) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Failed to fetch task" },
+      { status: 500 }
+    );
+  }
 }

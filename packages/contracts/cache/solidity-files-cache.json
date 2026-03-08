@@ -1,0 +1,189 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "C:\\Users\\sgoku\\Downloads\\Ve\\packages\\contracts\\contracts\\EscrowVault.sol": {
+      "lastModificationDate": 1772872405839,
+      "contentHash": "d118e59e423d2c640a9291642a143369",
+      "sourceName": "contracts/EscrowVault.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "EscrowVault"
+      ]
+    },
+    "C:\\Users\\sgoku\\Downloads\\Ve\\packages\\contracts\\contracts\\Settlement.sol": {
+      "lastModificationDate": 1772872875084,
+      "contentHash": "0e8bab808415dfa0eedd9904cb745ab4",
+      "sourceName": "contracts/Settlement.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./TaskRegistry.sol",
+        "./EscrowVault.sol",
+        "./SubmissionRegistry.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Settlement"
+      ]
+    },
+    "C:\\Users\\sgoku\\Downloads\\Ve\\packages\\contracts\\contracts\\TaskRegistry.sol": {
+      "lastModificationDate": 1772872401236,
+      "contentHash": "e9ecb229a82545727f7c8b1e5c3b21f4",
+      "sourceName": "contracts/TaskRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "TaskRegistry"
+      ]
+    },
+    "C:\\Users\\sgoku\\Downloads\\Ve\\packages\\contracts\\contracts\\SubmissionRegistry.sol": {
+      "lastModificationDate": 1772872412617,
+      "contentHash": "c00ceeafc3b69f36786d388c2351ee82",
+      "sourceName": "contracts/SubmissionRegistry.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "SubmissionRegistry"
+      ]
+    },
+    "C:\\Users\\sgoku\\Downloads\\Ve\\packages\\contracts\\contracts\\VeriActEscrow.sol": {
+      "lastModificationDate": 1772922976582,
+      "contentHash": "66c7ea9f9a4343119f36a73df04106a6",
+      "sourceName": "contracts/VeriActEscrow.sol",
+      "solcConfig": {
+        "version": "0.8.20",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "VeriActEscrow"
+      ]
+    }
+  }
+}

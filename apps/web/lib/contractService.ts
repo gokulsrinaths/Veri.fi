@@ -1,9 +1,9 @@
 /**
- * Contract service — isolated for future Creditcoin integration.
- * MVP uses mock chain only.
+ * Contract service — Creditcoin escrow + mock fallback.
  */
 
 import { releaseReward } from "./mockChain";
+import { releaseOnChain } from "./creditcoin-release-server";
 
 export interface SettlementResult {
   success: boolean;
@@ -13,12 +13,20 @@ export interface SettlementResult {
 export async function settleReward(
   taskId: string,
   submissionId: string,
-  rewardAmount: string
+  rewardAmount: string,
+  options?: { onchainTaskId?: number; participantAddress?: string }
 ): Promise<SettlementResult> {
-  // TODO: Connect to Creditcoin smart contract / EVM
+  const { onchainTaskId, participantAddress } = options ?? {};
+  if (onchainTaskId != null && participantAddress) {
+    try {
+      const result = await releaseOnChain(onchainTaskId, participantAddress);
+      if (result.success && result.txHash) {
+        return { success: true, txHash: result.txHash };
+      }
+    } catch (e) {
+      console.warn("On-chain release failed, using mock:", e);
+    }
+  }
   const result = releaseReward(taskId, submissionId, rewardAmount);
-  return {
-    success: result.success,
-    txHash: result.txHash,
-  };
+  return { success: result.success, txHash: result.txHash };
 }

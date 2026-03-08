@@ -1,10 +1,11 @@
 import type { Task, Submission } from "@/types/veriact";
+import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase";
 
-const tasks: Map<string, Task> = new Map();
-const submissions: Map<string, Submission> = new Map();
-const taskIdBySubmission: Map<string, string> = new Map();
+// --- In-memory fallback when Supabase is not configured ---
+const tasksMem: Map<string, Task> = new Map();
+const submissionsMem: Map<string, Submission> = new Map();
 
-function seedDefaultTask() {
+function seedDefaultTaskMem() {
   const seed: Task = {
     id: "seed-ev-charger-21",
     name: "Verify EV Charger #21",
@@ -21,102 +22,294 @@ function seedDefaultTask() {
     targetLongitude: -122.143,
     radiusMeters: 200,
   };
-  tasks.set(seed.id, seed);
+  tasksMem.set(seed.id, seed);
 }
 
-export function getTasks(status?: Task["status"]): Task[] {
-  if (tasks.size === 0) seedDefaultTask();
-  const list = Array.from(tasks.values());
-  if (status) return list.filter((t) => t.status === status);
-  return list;
-}
-
-export function getTask(id: string): Task | undefined {
-  if (tasks.size === 0) seedDefaultTask();
-  return tasks.get(id);
-}
-
-export function createTask(input: Omit<Task, "id" | "createdAt" | "status">): Task {
-  const id = `task-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-  const task: Task = {
-    ...input,
-    id,
-    status: "OPEN",
-    createdAt: new Date().toISOString(),
+function rowToTask(row: Record<string, unknown>): Task {
+  return {
+    id: String(row.id),
+    name: String(row.name),
+    description: String(row.description),
+    expectedLocation: String(row.expected_location),
+    requiredEvidenceType: (row.required_evidence_type as Task["requiredEvidenceType"]) ?? "Photo + GPS",
+    rewardAmount: String(row.reward_amount ?? "5 CTC"),
+    threshold: Number(row.threshold ?? 0.7),
+    expectedObject: String(row.expected_object ?? "EV Charger"),
+    status: (row.status as Task["status"]) ?? "OPEN",
+    createdAt: String(row.created_at),
+    sponsorWallet: row.sponsor_wallet != null ? String(row.sponsor_wallet) : undefined,
+    onchainTaskId: row.onchain_task_id != null ? Number(row.onchain_task_id) : undefined,
+    escrowTxHash: row.escrow_tx_hash != null ? String(row.escrow_tx_hash) : undefined,
+    targetLatitude: row.target_latitude != null ? Number(row.target_latitude) : undefined,
+    targetLongitude: row.target_longitude != null ? Number(row.target_longitude) : undefined,
+    radiusMeters: row.radius_meters != null ? Number(row.radius_meters) : undefined,
   };
-  tasks.set(id, task);
-  return task;
 }
 
-export function addSubmission(
+function rowToSubmission(row: Record<string, unknown>): Submission {
+  const exifData = row.exif_data as Submission["exifData"];
+  let manualLocation: Submission["manualLocation"] = null;
+  if (row.manual_lat != null && row.manual_lng != null) {
+    manualLocation = { lat: Number(row.manual_lat), lng: Number(row.manual_lng) };
+  }
+  return {
+    id: String(row.id),
+    taskId: String(row.task_id),
+    participantAddress: row.participant_address != null ? String(row.participant_address) : null,
+    imageUrl: String(row.image_url),
+    note: row.note != null ? String(row.note) : undefined,
+    exifData: exifData ?? null,
+    manualLocation,
+    verificationScore: row.verification_score != null ? Number(row.verification_score) : undefined,
+    status: (row.status as Submission["status"]) ?? "PENDING",
+    reasoning: row.reasoning != null ? String(row.reasoning) : undefined,
+    txHash: row.tx_hash != null ? String(row.tx_hash) : null,
+    submittedAt: String(row.submitted_at),
+    scoreBreakdown: row.score_breakdown as Submission["scoreBreakdown"],
+  };
+}
+
+export async function getTasks(status?: Task["status"]): Promise<Task[]> {
+  if (!isSupabaseConfigured()) {
+    if (tasksMem.size === 0) seedDefaultTaskMem();
+    const list = Array.from(tasksMem.values());
+    if (status) return list.filter((t) => t.status === status);
+    return list;
+  }
+  const supabase = getSupabaseClient();
+  let query = supabase.from("tasks").select("*").order("created_at", { ascending: false });
+  if (status) query = query.eq("status", status);
+  const { data, error } = await query;
+  if (error) throw new Error(error.message);
+  const tasks = (data ?? []).map(rowToTask);
+  return tasks;
+}
+
+export async function getTask(id: string): Promise<Task | undefined> {
+  if (!isSupabaseConfigured()) {
+    if (tasksMem.size === 0) seedDefaultTaskMem();
+    return tasksMem.get(id);
+  }
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase.from("tasks").select("*").eq("id", id).single();
+  if (error || !data) return undefined;
+  return rowToTask(data);
+}
+
+export async function createTask(input: Omit<Task, "id" | "createdAt" | "status">): Promise<Task> {
+  if (!isSupabaseConfigured()) {
+    const id = `task-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const task: Task = {
+      ...input,
+      id,
+      status: "OPEN",
+      createdAt: new Date().toISOString(),
+    };
+    tasksMem.set(id, task);
+    return task;
+  }
+  const supabase = getSupabaseClient();
+  const row = {
+    sponsor_wallet: input.sponsorWallet ?? null,
+    name: input.name,
+    description: input.description,
+    expected_location: input.expectedLocation,
+    required_evidence_type: input.requiredEvidenceType ?? "Photo + GPS",
+    reward_amount: input.rewardAmount ?? "5 CTC",
+    threshold: input.threshold ?? 0.7,
+    expected_object: input.expectedObject ?? "EV Charger",
+    target_latitude: input.targetLatitude ?? 37.4419,
+    target_longitude: input.targetLongitude ?? -122.143,
+    radius_meters: input.radiusMeters ?? 200,
+    onchain_task_id: input.onchainTaskId ?? null,
+    escrow_tx_hash: input.escrowTxHash ?? null,
+  };
+  const { data, error } = await supabase.from("tasks").insert(row).select().single();
+  if (error) throw new Error(error.message);
+  return rowToTask(data);
+}
+
+export async function addSubmission(
   taskId: string,
   data: {
     imageUrl: string;
     note?: string;
     exifData?: Submission["exifData"];
     manualLocation?: Submission["manualLocation"];
+    participantAddress?: string | null;
   }
-): Submission {
-  const id = `sub-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-  const submission: Submission = {
-    id,
-    taskId,
-    imageUrl: data.imageUrl,
-    note: data.note,
-    exifData: data.exifData ?? null,
-    manualLocation: data.manualLocation ?? null,
-    status: "PENDING",
-    submittedAt: new Date().toISOString(),
+): Promise<Submission> {
+  if (!isSupabaseConfigured()) {
+    const id = `sub-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const submission: Submission = {
+      id,
+      taskId,
+      imageUrl: data.imageUrl,
+      note: data.note,
+      exifData: data.exifData ?? null,
+      manualLocation: data.manualLocation ?? null,
+      participantAddress: data.participantAddress ?? null,
+      status: "PENDING",
+      submittedAt: new Date().toISOString(),
+    };
+    submissionsMem.set(id, submission);
+    return submission;
+  }
+  const supabase = getSupabaseClient();
+  const row = {
+    task_id: taskId,
+    participant_address: data.participantAddress ?? null,
+    image_url: data.imageUrl,
+    note: data.note ?? null,
+    exif_data: data.exifData ?? null,
+    manual_lat: data.manualLocation?.lat ?? null,
+    manual_lng: data.manualLocation?.lng ?? null,
   };
-  submissions.set(id, submission);
-  taskIdBySubmission.set(id, taskId);
-  return submission;
+  const { data: inserted, error } = await supabase.from("submissions").insert(row).select().single();
+  if (error) throw new Error(error.message);
+  return rowToSubmission(inserted);
 }
 
-export function getSubmission(id: string): Submission | undefined {
-  return submissions.get(id);
+export async function getSubmission(id: string): Promise<Submission | undefined> {
+  if (!isSupabaseConfigured()) {
+    return submissionsMem.get(id);
+  }
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase.from("submissions").select("*").eq("id", id).single();
+  if (error || !data) return undefined;
+  return rowToSubmission(data);
 }
 
-export function updateSubmission(
+export async function updateSubmission(
   id: string,
-  update: Partial<Pick<Submission, "status" | "verificationScore" | "reasoning" | "txHash" | "scoreBreakdown">>
-): Submission | undefined {
-  const sub = submissions.get(id);
-  if (!sub) return undefined;
-  const next = { ...sub, ...update };
-  submissions.set(id, next);
-  return next;
+  update: Partial<Pick<Submission, "status" | "verificationScore" | "reasoning" | "txHash" | "scoreBreakdown" | "participantAddress">>
+): Promise<Submission | undefined> {
+  if (!isSupabaseConfigured()) {
+    const sub = submissionsMem.get(id);
+    if (!sub) return undefined;
+    const next = { ...sub, ...update };
+    submissionsMem.set(id, next);
+    return next;
+  }
+  const supabase = getSupabaseClient();
+  const row: Record<string, unknown> = {};
+  if (update.status != null) row.status = update.status;
+  if (update.verificationScore != null) row.verification_score = update.verificationScore;
+  if (update.reasoning != null) row.reasoning = update.reasoning;
+  if (update.txHash != null) row.tx_hash = update.txHash;
+  if (update.scoreBreakdown != null) row.score_breakdown = update.scoreBreakdown;
+  if (update.participantAddress != null) row.participant_address = update.participantAddress;
+  row.updated_at = new Date().toISOString();
+  const { data, error } = await supabase.from("submissions").update(row).eq("id", id).select().single();
+  if (error) return undefined;
+  return rowToSubmission(data);
 }
 
-export function getSubmissionsByTaskId(taskId: string): Submission[] {
-  return Array.from(submissions.values()).filter((s) => s.taskId === taskId);
+export async function getSubmissionsByTaskId(taskId: string): Promise<Submission[]> {
+  if (!isSupabaseConfigured()) {
+    return Array.from(submissionsMem.values()).filter((s) => s.taskId === taskId);
+  }
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("submissions")
+    .select("*")
+    .eq("task_id", taskId)
+    .order("submitted_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map(rowToSubmission);
 }
 
-export function getDashboardStats() {
-  const allTasks = Array.from(tasks.values());
-  const allSubs = Array.from(submissions.values());
-  const verified = allSubs.filter((s) => s.status === "VERIFIED" || s.status === "PAID");
+export async function getDashboardStats(): Promise<{
+  totalTasks: number;
+  verifiedSubmissions: number;
+  rewardsReleased: string;
+  recentActivity: Array<{ id: string; taskName: string; status: string; submittedAt: string; score?: number }>;
+}> {
+  if (!isSupabaseConfigured()) {
+    const allTasks = Array.from(tasksMem.values());
+    const allSubs = Array.from(submissionsMem.values());
+    const verified = allSubs.filter((s) => s.status === "VERIFIED" || s.status === "PAID");
+    let rewardsReleased = 0;
+    verified.forEach((s) => {
+      const task = tasksMem.get(s.taskId);
+      if (task) rewardsReleased += parseFloat(task.rewardAmount) || 0;
+    });
+    const recent = [...allSubs]
+      .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
+      .slice(0, 10);
+    return {
+      totalTasks: allTasks.length,
+      verifiedSubmissions: verified.length,
+      rewardsReleased: rewardsReleased.toFixed(2),
+      recentActivity: recent.map((s) => {
+        const task = tasksMem.get(s.taskId);
+        return {
+          id: s.id,
+          taskName: task?.name ?? "Unknown",
+          status: s.status,
+          submittedAt: s.submittedAt,
+          score: s.verificationScore,
+        };
+      }),
+    };
+  }
+  const supabase = getSupabaseClient();
+  const [tasksRes, subsRes] = await Promise.all([
+    supabase.from("tasks").select("id, name, reward_amount"),
+    supabase.from("submissions").select("id, task_id, status, submitted_at, verification_score").order("submitted_at", { ascending: false }).limit(100),
+  ]);
+  if (tasksRes.error) throw new Error(tasksRes.error.message);
+  if (subsRes.error) throw new Error(subsRes.error.message);
+  const tasks = tasksRes.data ?? [];
+  const subs = subsRes.data ?? [];
+  const taskMap = new Map(tasks.map((t) => [t.id, t]));
+  const verified = subs.filter((s) => s.status === "VERIFIED" || s.status === "PAID");
   let rewardsReleased = 0;
   verified.forEach((s) => {
-    const task = tasks.get(s.taskId);
-    if (task) rewardsReleased += parseFloat(task.rewardAmount) || 0;
+    const task = taskMap.get(s.task_id);
+    if (task) rewardsReleased += parseFloat(String(task.reward_amount)) || 0;
   });
-  const recent = [...allSubs].sort(
-    (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
-  ).slice(0, 10);
+  const recent = subs.slice(0, 10);
   return {
-    totalTasks: allTasks.length,
+    totalTasks: tasks.length,
     verifiedSubmissions: verified.length,
     rewardsReleased: rewardsReleased.toFixed(2),
     recentActivity: recent.map((s) => {
-      const task = tasks.get(s.taskId);
+      const task = taskMap.get(s.task_id);
       return {
         id: s.id,
         taskName: task?.name ?? "Unknown",
         status: s.status,
-        submittedAt: s.submittedAt,
-        score: s.verificationScore,
+        submittedAt: s.submitted_at,
+        score: s.verification_score != null ? Number(s.verification_score) : undefined,
       };
     }),
   };
+}
+
+/** Insert verification result row (optional; scores also stored on submission). */
+export async function insertVerificationResult(
+  submissionId: string,
+  result: {
+    visualScore: number;
+    locationScore: number;
+    timestampScore: number;
+    antiFraudScore: number;
+    finalScore: number;
+    verified: boolean;
+    reasoning?: string;
+  }
+): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const supabase = getSupabaseClient();
+  await supabase.from("verification_results").insert({
+    submission_id: submissionId,
+    visual_score: result.visualScore,
+    location_score: result.locationScore,
+    timestamp_score: result.timestampScore,
+    anti_fraud_score: result.antiFraudScore,
+    final_score: result.finalScore,
+    verified: result.verified,
+    reasoning: result.reasoning ?? null,
+  });
 }

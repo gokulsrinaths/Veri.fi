@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Inbox } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 export function EmptyState({
   title,
@@ -14,14 +15,26 @@ export function EmptyState({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="rounded-2xl border border-dashed border-white/20 bg-white/5 p-12 text-center"
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 300, damping: 26 }}
     >
-      <Inbox className="w-12 h-12 text-white/30 mx-auto mb-4" />
-      <h3 className="font-semibold text-white mb-1">{title}</h3>
-      <p className="text-sm text-white/50 mb-6 max-w-sm mx-auto">{description}</p>
-      {action}
+      <Card className="border-dashed">
+        <CardContent className="p-12 text-center">
+          <motion.div
+            initial={{ y: 4 }}
+            animate={{ y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Inbox className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+          </motion.div>
+          <h3 className="font-semibold text-foreground mb-1">{title}</h3>
+          <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+            {description}
+          </p>
+          {action}
+        </CardContent>
+      </Card>
     </motion.div>
   );
 }

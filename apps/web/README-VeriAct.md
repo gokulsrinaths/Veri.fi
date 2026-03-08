@@ -64,6 +64,67 @@ No other env vars are required for the MVP.
 
 ## Where to plug in real Creditcoin
 
+**Creditcoin testnet integration is included.** You can lock rewards on-chain when creating a task and release them when AI verification succeeds.
+
+### 1. Install dependencies
+
+```bash
+# Contracts
+cd packages/contracts
+npm install
+
+# Web (if not already)
+cd ../../apps/web
+npm install
+```
+
+### 2. Compile and deploy VeriActEscrow
+
+```bash
+cd packages/contracts
+# Set in .env: PRIVATE_KEY, VERIFIER_ADDRESS (or DEPLOYER_ADDRESS)
+npm run compile
+npm run deploy:veriact
+```
+
+Copy the printed `NEXT_PUBLIC_VERIACT_ESCROW_ADDRESS` into `apps/web/.env.local`.
+
+### 3. Configure apps/web .env.local
+
+```env
+NEXT_PUBLIC_VERIACT_ESCROW_ADDRESS=0x...   # from deploy
+NEXT_PUBLIC_CREDITCOIN_RPC=https://rpc.testnet.creditcoin.network
+VERIFIER_PRIVATE_KEY=0x...   # private key of verifier (can be same as deployer for hackathon)
+```
+
+### 4. Run the Next.js app
+
+```bash
+cd apps/web
+npm run dev
+```
+
+### 5. Connect MetaMask to Creditcoin testnet
+
+- Network name: Creditcoin Testnet  
+- RPC: `https://rpc.testnet.creditcoin.network`  
+- Chain ID: 102031  
+- Currency: CTC  
+
+The app will prompt to add the network if needed.
+
+### MVP flow with on-chain escrow
+
+1. **Create Task** — Sponsor connects wallet, enters reward (e.g. 5 CTC). Clicks Create → reward is escrowed on Creditcoin testnet (`createTask()` payable), then task is saved with `onchainTaskId` and `escrowTxHash`. UI shows “Reward escrowed on Creditcoin testnet”.
+2. **Explore Tasks** — Same as before; tasks with `onchainTaskId` are on-chain.
+3. **Task Detail** — Participant uploads proof. Optional: click “Use my wallet for reward” to set the address that will receive the payout.
+4. **Submit Proof** — AI verification runs. If score ≥ threshold and task has `onchainTaskId` and submission has `participantAddress`, the backend (verifier key) calls `verifyTask(onchainTaskId, worker)` and the reward is sent on-chain. Otherwise mock settlement is used.
+5. **Verification Result** — Shows “Reward released” and the real transaction hash when on-chain payout succeeded.
+
+---
+
+## Legacy / mock-only
+
 - **Contract layer:** Replace the implementation in `lib/contractService.ts` (and optionally keep `lib/mockChain.ts` for tests).
 - **Tasks / submissions:** Today they live in `lib/store.ts` (in-memory). For production, swap to Supabase, Prisma, or your DB and keep the same shapes in `types/veriact.ts`.
 - **Storage:** Proof images are currently sent as base64 in the API and stored in memory. For scale, upload to Supabase Storage or S3 and store URLs.

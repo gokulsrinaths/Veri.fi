@@ -17,5 +17,5 @@ export const config = createConfig({
   connectors: [injected()],
   transports: {
     [chain.id]: http(process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8545"),
-  },
+  } as Record<number, ReturnType<typeof http>>,
 });

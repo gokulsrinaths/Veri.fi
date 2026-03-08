@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const steps = [
   { id: "upload", label: "Upload received" },
@@ -9,6 +11,8 @@ const steps = [
   { id: "location", label: "Comparing location and timestamp" },
   { id: "score", label: "Calculating confidence score" },
 ];
+
+const spring = { type: "spring", stiffness: 400, damping: 30 };
 
 export function VerificationStepper({ currentStep }: { currentStep: number }) {
   return (
@@ -19,21 +23,48 @@ export function VerificationStepper({ currentStep }: { currentStep: number }) {
         return (
           <motion.div
             key={step.id}
-            initial={{ opacity: 0, x: -8 }}
+            initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.15 }}
-            className={`flex items-center gap-3 rounded-xl px-4 py-2.5 border ${
-              active ? "border-emerald-500/40 bg-emerald-500/10" : "border-white/10 bg-white/5"
-            }`}
+            transition={{ ...spring, delay: i * 0.08 }}
           >
-            <span
-              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                done ? "bg-emerald-500 text-black" : active ? "bg-emerald-500/30 text-emerald-400" : "bg-white/10 text-white/50"
-              }`}
+            <motion.div
+              animate={{
+                scale: active ? 1.02 : 1,
+                transition: { duration: 0.2 },
+              }}
             >
-              {done ? "✓" : i + 1}
-            </span>
-            <span className={active ? "text-white font-medium" : "text-white/60"}>{step.label}</span>
+              <Card
+                className={cn(
+                  "border-2 transition-colors duration-200",
+                  active
+                    ? "border-primary/40 bg-primary/10 shadow-md shadow-primary/5"
+                    : "border-border bg-card"
+                )}
+              >
+                <CardContent className="flex items-center gap-3 py-2.5 px-4">
+                  <span
+                    className={cn(
+                      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium transition-colors duration-200",
+                      done
+                        ? "bg-primary text-primary-foreground"
+                        : active
+                          ? "bg-primary/30 text-primary scale-110"
+                          : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {done ? "✓" : i + 1}
+                  </span>
+                  <span
+                    className={cn(
+                      "text-sm transition-colors duration-200",
+                      active ? "font-medium text-foreground" : "text-muted-foreground"
+                    )}
+                  >
+                    {step.label}
+                  </span>
+                </CardContent>
+              </Card>
+            </motion.div>
           </motion.div>
         );
       })}

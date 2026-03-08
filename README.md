@@ -4,6 +4,34 @@
 
 ---
 
+## Web-only Quick Start (hackathon demo)
+
+The main hackathon demo runs with **just the web app**. No database or separate API server required.
+
+1. **Copy env (optional but recommended)**  
+   ```bash
+   cp apps/web/.env.example apps/web/.env.local
+   ```  
+   You can run without this; the app will use defaults (mock verification, mock settlement).
+
+2. **Install and run**  
+   ```bash
+   pnpm install
+   pnpm dev:web
+   ```  
+   Open [http://localhost:3000](http://localhost:3000).
+
+3. **Behavior without env**  
+   - **AI verification**: Falls back to mock mode if `DEEPINFRA_API_KEY` / `OPENAI_API_KEY` are not set.  
+   - **Settlement**: Falls back to mock/demo mode if `VERIFIER_PRIVATE_KEY` or `NEXT_PUBLIC_VERIACT_ESCROW_ADDRESS` are not set.  
+   - **Data**: Tasks and submissions are stored in memory and **reset when the server restarts**.
+
+**Optional — Supabase backend:** To persist tasks and submissions, set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` in `apps/web/.env.local`, run the SQL in `supabase/schema.sql` in your Supabase project (SQL Editor), create the **proof-images** storage bucket if needed (Dashboard → Storage), then restart the app. With Supabase configured, proof images are stored in Storage and the seed task has a UUID (use **Explore Tasks** to open it).
+
+For full stack (Fastify API, PostgreSQL, contracts), see **Local setup** below.
+
+---
+
 ## Problem
 
 Proving that a real-world action happened (e.g. “this EV charger is operational”, “this store is open”) is hard to automate and trust. Manual checks don’t scale; pure self-reports are easy to game.

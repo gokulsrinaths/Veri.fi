@@ -11,7 +11,7 @@ export default function DemoPage() {
     <div className="min-h-screen bg-black text-white">
       <nav className="border-b border-white/10 px-4 py-4 flex items-center justify-between">
         <Link href="/" className="text-xl font-semibold tracking-tight">
-          Veri<span className="text-emerald-400">Act</span>
+          veri<span className="text-primary">.fi</span>
         </Link>
         <span className="text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400">Demo</span>
       </nav>

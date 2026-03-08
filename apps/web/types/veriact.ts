@@ -17,7 +17,12 @@ export interface Task {
   expectedObject: string;
   status: TaskStatus;
   createdAt: string;
-  /** For location scoring — optional lat/lng for demo */
+  /** Wallet address of the sponsor who created the task */
+  sponsorWallet?: string | null;
+  /** On-chain escrow task id (Creditcoin) */
+  onchainTaskId?: number;
+  /** Tx hash when reward was escrowed */
+  escrowTxHash?: string;
   targetLatitude?: number;
   targetLongitude?: number;
   radiusMeters?: number;
@@ -33,6 +38,8 @@ export interface ExifData {
 export interface Submission {
   id: string;
   taskId: string;
+  /** Participant wallet address (for on-chain payout) */
+  participantAddress?: string | null;
   imageUrl: string;
   note?: string;
   exifData?: ExifData | null;

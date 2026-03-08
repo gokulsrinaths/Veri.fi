@@ -1,5 +1,6 @@
 /**
- * AI verifier — OpenAI Vision when API key present, else mock.
+ * AI verifier — DeepInfra (Llama vision) or OpenAI Vision when API key present, else mock.
+ * Image is checked according to the task (name, description, expected object, location).
  * Score = 0.45 * visual + 0.25 * location + 0.15 * timestamp + 0.15 * antiFraud
  */
 
@@ -12,6 +13,9 @@ const WEIGHTS = {
   timestamp: 0.15,
   antiFraud: 0.15,
 };
+
+const DEEPINFRA_BASE = "https://api.deepinfra.com/v1/openai";
+const DEEPINFRA_VISION_MODEL = "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8";
 
 function haversineMeters(
   lat1: number,
@@ -38,12 +42,95 @@ export interface VisualAnalysis {
   suspiciousSignals: string[];
 }
 
+function buildTaskPrompt(task: Task): string {
+  return [
+    `Task: ${task.name}`,
+    `Description: ${task.description}`,
+    `Expected object to verify in the image: ${task.expectedObject}`,
+    `Expected location (for context): ${task.expectedLocation}`,
+    "",
+    "Look at the image and decide whether it satisfies this task. Does the image clearly show the expected object/evidence described above?",
+    "Return ONLY valid JSON with no markdown or extra text: { \"containsExpectedObject\": true or false, \"confidence\": number between 0 and 1, \"sceneSummary\": string describing what you see, \"suspiciousSignals\": array of strings (empty if none) }",
+  ].join("\n");
+}
+
+function parseVisualResponse(content: string): VisualAnalysis | null {
+  try {
+    const cleaned = content.replace(/^```json?\s*|\s*```$/g, "").trim();
+    const parsed = JSON.parse(cleaned) as Record<string, unknown>;
+    return {
+      containsExpectedObject: !!parsed.containsExpectedObject,
+      confidence: Math.min(1, Math.max(0, Number(parsed.confidence) ?? 0.5)),
+      sceneSummary: String(parsed.sceneSummary ?? ""),
+      suspiciousSignals: Array.isArray(parsed.suspiciousSignals)
+        ? (parsed.suspiciousSignals as string[])
+        : [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** DeepInfra vision API (OpenAI-compatible). Checks image according to task. */
+async function visualScoreWithDeepInfra(
+  imageBase64: string,
+  task: Task
+): Promise<VisualAnalysis> {
+  const key = process.env.DEEPINFRA_API_KEY;
+  if (!key) return mockVisualScore(task.expectedObject, imageBase64);
+
+  const prompt = buildTaskPrompt(task);
+  const imageUrl = `data:image/jpeg;base64,${imageBase64}`;
+
+  try {
+    const res = await fetch(`${DEEPINFRA_BASE}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model: DEEPINFRA_VISION_MODEL,
+        max_tokens: 4092,
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              {
+                type: "image_url",
+                image_url: { url: imageUrl },
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    if (!res.ok) return mockVisualScore(task.expectedObject, imageBase64);
+
+    const data = (await res.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const content = data.choices?.[0]?.message?.content?.trim();
+    if (!content) return mockVisualScore(task.expectedObject, imageBase64);
+
+    const parsed = parseVisualResponse(content);
+    if (parsed) return parsed;
+    return mockVisualScore(task.expectedObject, imageBase64);
+  } catch {
+    return mockVisualScore(task.expectedObject, imageBase64);
+  }
+}
+
 async function visualScoreWithOpenAI(
   imageBase64: string,
-  expectedObject: string
+  task: Task
 ): Promise<VisualAnalysis> {
   const key = process.env.OPENAI_API_KEY;
-  if (!key) return mockVisualScore(expectedObject, imageBase64);
+  if (!key) return mockVisualScore(task.expectedObject, imageBase64);
+
+  const prompt = buildTaskPrompt(task);
 
   try {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -59,10 +146,7 @@ async function visualScoreWithOpenAI(
           {
             role: "user",
             content: [
-              {
-                type: "text",
-                text: `Analyze this image and determine if it contains ${expectedObject}. Return ONLY valid JSON with: { "containsExpectedObject": boolean, "confidence": number 0-1, "sceneSummary": string, "suspiciousSignals": string[] }`,
-              },
+              { type: "text", text: prompt },
               {
                 type: "image_url",
                 image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
@@ -72,20 +156,27 @@ async function visualScoreWithOpenAI(
         ],
       }),
     });
-    if (!res.ok) return mockVisualScore(expectedObject, imageBase64);
+    if (!res.ok) return mockVisualScore(task.expectedObject, imageBase64);
     const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
     const content = data.choices?.[0]?.message?.content?.trim();
-    if (!content) return mockVisualScore(expectedObject, imageBase64);
-    const parsed = JSON.parse(content.replace(/^```json?\s*|\s*```$/g, "")) as VisualAnalysis;
-    return {
-      containsExpectedObject: !!parsed.containsExpectedObject,
-      confidence: Math.min(1, Math.max(0, Number(parsed.confidence) ?? 0.8)),
-      sceneSummary: String(parsed.sceneSummary ?? ""),
-      suspiciousSignals: Array.isArray(parsed.suspiciousSignals) ? parsed.suspiciousSignals : [],
-    };
+    if (!content) return mockVisualScore(task.expectedObject, imageBase64);
+    const parsed = parseVisualResponse(content);
+    if (parsed) return parsed;
+    return mockVisualScore(task.expectedObject, imageBase64);
   } catch {
-    return mockVisualScore(expectedObject, imageBase64);
+    return mockVisualScore(task.expectedObject, imageBase64);
   }
+}
+
+/** Resolve visual analysis: DeepInfra first, then OpenAI, then mock. */
+async function runVisualCheck(imageBase64: string, task: Task): Promise<VisualAnalysis> {
+  if (process.env.DEEPINFRA_API_KEY) {
+    return visualScoreWithDeepInfra(imageBase64, task);
+  }
+  if (process.env.OPENAI_API_KEY) {
+    return visualScoreWithOpenAI(imageBase64, task);
+  }
+  return mockVisualScore(task.expectedObject, imageBase64);
 }
 
 function mockVisualScore(expectedObject: string, _imageBase64: string): VisualAnalysis {
@@ -131,7 +222,7 @@ export async function runVerification(input: VerifyInput): Promise<VerifyResult>
     fileSizeBytes = 0,
   } = input;
 
-  const visual = await visualScoreWithOpenAI(imageBase64, task.expectedObject);
+  const visual = await runVisualCheck(imageBase64, task);
   const visualScore = visual.containsExpectedObject ? visual.confidence : visual.confidence * 0.6;
 
   const lat = exifLatitude ?? manualLat ?? null;

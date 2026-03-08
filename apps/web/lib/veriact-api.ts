@@ -30,9 +30,12 @@ export const tasksApi = {
     rewardAmount: string;
     threshold: number;
     expectedObject: string;
+    sponsorWallet?: string | null;
     targetLatitude?: number;
     targetLongitude?: number;
     radiusMeters?: number;
+    onchainTaskId?: number;
+    escrowTxHash?: string;
   }) => api<unknown>("/tasks", { method: "POST", body: JSON.stringify(body) }),
 };
 

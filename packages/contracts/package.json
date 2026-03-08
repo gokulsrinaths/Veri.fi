@@ -6,6 +6,7 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy": "hardhat run scripts/deploy.ts",
+    "deploy:veriact": "hardhat run scripts/deploy-veriact.ts --network creditcoinTestnet",
     "deploy:local": "hardhat run scripts/deploy.ts --network localhost"
   },
   "devDependencies": {
