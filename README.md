@@ -1,98 +1,138 @@
-# veri.fi
+<p align="center">
+  <img src="https://img.shields.io/badge/veri.fi-34d399?style=for-the-badge&labelColor=0a0a0a" alt="veri.fi" />
+</p>
 
-> **Turn real-world activity into programmable proof.**
-
-We verify that people actually did the thing — then pay them on-chain. No trust, no manual checks.
-
-Built for **BUIDL CTC Hackathon** — Build for the Real World.
+<h1 align="center">veri.fi</h1>
+<p align="center">
+  <strong>Turn real-world activity into programmable proof.</strong>
+</p>
+<p align="center">
+  We verify that people actually did the thing — then pay them on-chain.<br />
+  <em>No trust. No manual checks.</em>
+</p>
+<p align="center">
+  <sub>Built for <strong>BUIDL CTC Hackathon</strong> — Build for the Real World</sub>
+</p>
 
 ---
 
-## What we built
+## ✨ What it is
 
-Sponsors post tasks and lock rewards on Creditcoin. Participants submit photo proof. Our backend scores it (visual + location + time + anti-fraud). If the score clears the threshold, the smart contract releases the reward. Task closes. Done.
+**veri.fi** connects real-world proof to on-chain rewards. Sponsors create tasks and lock rewards (CTC) on Creditcoin. Participants submit photo proof. Our backend scores each submission with a weighted model — visual (AI), location, timestamp, anti-fraud — and when the score clears the threshold, the smart contract releases the reward. Task closes. Done.
 
-**One sentence:** Prove it → we verify it → you get paid.
+```
+Prove it  →  We verify it  →  You get paid.
+```
 
 ---
 
-## Try it
+## 🚀 Quick start
 
 ```bash
+git clone https://github.com/gokulsrinaths/Veri.fi.git
+cd Veri.fi
 pnpm install
 pnpm dev:web
 ```
 
-Open **http://localhost:3000**. Connect a wallet, create or open a task, upload proof, get verified.
+Open **http://localhost:3000**. Connect a wallet (MetaMask), create or explore tasks, upload proof, get verified.
 
-Optional: copy `apps/web/.env.example` → `apps/web/.env.local` and add Supabase / API keys for persistence and real verification. Without them, the app still runs (in-memory, fallback verifier).
-
----
-
-## How it works
-
-1. **Create task** — Name, reward (e.g. 5 CTC), location (or “online”), threshold. Optionally escrow on Creditcoin testnet.
-2. **Submit proof** — Photo + optional GPS. Backend runs EXIF, vision (DeepInfra/OpenAI or fallback), and scoring.
-3. **Verify** — Weighted score (e.g. 0.45 visual + 0.25 location + 0.15 timestamp + 0.15 anti-fraud). Pass = verified.
-4. **Settle** — Backend calls escrow `verifyTask(taskId, worker)`; reward goes to the participant. Task is closed and drops off the list.
+| Optional | Action |
+|----------|--------|
+| Persistence | Copy `apps/web/.env.example` → `apps/web/.env.local` and add Supabase URL + keys |
+| AI vision | Set `DEEPINFRA_API_KEY` or `OPENAI_API_KEY` for real image checks (otherwise fallback scoring) |
+| On-chain | Deploy VeriActEscrow and set contract address + `VERIFIER_PRIVATE_KEY` (see below) |
 
 ---
 
-## Tech
+## 🔄 How it works
 
-Next.js 14 · TypeScript · Tailwind · Supabase (optional) · Creditcoin testnet (VeriActEscrow) · DeepInfra/OpenAI for vision
-
-Monorepo: `apps/web` is the main app; `packages/contracts` for Solidity.
-
----
-
-## Deploy on Vercel (frontend)
-
-1. Push the repo to GitHub (if you haven’t).
-2. Go to [vercel.com](https://vercel.com) → **Add New Project** → import your repo.
-3. Set **Root Directory** to `apps/web` (Edit → Root Directory → `apps/web`).
-4. Add **Environment Variables** (Settings → Environment Variables) for production (and preview if you want):
-   - `NEXT_PUBLIC_CREDITCOIN_RPC` = `https://rpc.testnet.creditcoin.network`
-   - `NEXT_PUBLIC_VERIACT_ESCROW_ADDRESS` = your deployed contract address (optional; app works with fallback without it)
-   - Optional: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `DEEPINFRA_API_KEY` or `OPENAI_API_KEY`, `VERIFIER_PRIVATE_KEY` (only if you need server-side payout on Vercel).
-5. **Deploy**. The repo’s `apps/web/vercel.json` uses a monorepo-friendly install (`pnpm install` from repo root) and `pnpm run build`.
-
-Use the generated URL (e.g. `verifi.vercel.app`) as your **Live demo** link in HACKATHON-SUBMISSION.md.
-
-**Using Vercel MCP:** If you use the Vercel MCP in Cursor and it tells you to run `vercel deploy`, run it from the **frontend** directory so the project root is correct: `cd apps/web && vercel deploy` (or from repo root: `pnpm run deploy:vercel`). Set **Root Directory** to `apps/web` in the Vercel dashboard if you linked from the repo root.
+| Step | What happens |
+|------|----------------|
+| **1. Create task** | Name, reward (e.g. 5 CTC), location type (online or physical with lat/long), threshold. Optionally escrow on Creditcoin testnet. |
+| **2. Submit proof** | Photo + optional GPS. Backend extracts EXIF, runs vision (DeepInfra/OpenAI or fallback), and scores. |
+| **3. Verify** | Weighted score: 0.45 visual + 0.25 location + 0.15 timestamp + 0.15 anti-fraud. Pass = verified. |
+| **4. Settle** | Backend calls escrow `verifyTask(taskId, worker)`; reward goes to the participant; task is closed. |
 
 ---
 
-## Deploy to Creditcoin testnet
+## 🛠 Tech
+
+- **Frontend:** Next.js 14 (App Router), TypeScript, Tailwind, Framer Motion
+- **Backend:** Next.js API routes, optional Supabase (tasks, submissions, proof images)
+- **Chain:** Creditcoin testnet — VeriActEscrow (Solidity) for escrow and payout
+- **Verification:** EXIF, DeepInfra / OpenAI vision (or fallback), haversine location, weighted scoring
+
+Monorepo: `apps/web` (main app), `packages/contracts` (Solidity).
+
+---
+
+## 🌐 Deploy frontend (Vercel)
+
+1. Push the repo to GitHub.
+2. [vercel.com](https://vercel.com) → **Add New** → **Project** → import repo.
+3. Set **Root Directory** to **`apps/web`**.
+4. (Optional) Add env vars: `NEXT_PUBLIC_CREDITCOIN_RPC`, `NEXT_PUBLIC_VERIACT_ESCROW_ADDRESS`, etc. — see [VERCEL-DEPLOY.md](./VERCEL-DEPLOY.md).
+5. Deploy. Use the generated URL as your live demo link.
+
+CLI: from repo root run `pnpm run deploy:vercel` (or `cd apps/web && vercel deploy`).
+
+---
+
+## ⛓ Deploy to Creditcoin testnet
 
 To run with real on-chain escrow:
 
-1. `cd packages/contracts` → set `PRIVATE_KEY`, `VERIFIER_ADDRESS` in `.env` → `pnpm run compile && pnpm run deploy:veriact`
-2. In `apps/web/.env.local`: `NEXT_PUBLIC_VERIACT_ESCROW_ADDRESS=<printed address>`, `NEXT_PUBLIC_CREDITCOIN_RPC=https://rpc.testnet.creditcoin.network`, `VERIFIER_PRIVATE_KEY=0x...`
-3. `pnpm dev:web` — create a task with a reward; it escrows on testnet and pays out on verification.
+```bash
+cd packages/contracts
+cp .env.example .env
+# Set PRIVATE_KEY, VERIFIER_ADDRESS in .env
+pnpm install && pnpm run compile && pnpm run deploy:veriact
+```
+
+Then in `apps/web/.env.local`:
+
+- `NEXT_PUBLIC_VERIACT_ESCROW_ADDRESS` = printed contract address  
+- `NEXT_PUBLIC_CREDITCOIN_RPC` = `https://rpc.testnet.creditcoin.network`  
+- `VERIFIER_PRIVATE_KEY` = verifier wallet private key (for backend payout)
+
+Restart with `pnpm dev:web`. Create a task with a reward; it escrows on testnet and pays out on verification.
 
 ---
 
-## Hackathon fit
+## 🏆 Hackathon fit
 
-- **DePIN** — Verify physical infrastructure (e.g. EV chargers, sensors).
-- **RWA** — Attest real-world state (e.g. store open, asset condition).
-- **DeFi** — Escrow + settlement on Creditcoin.
+| Track | How veri.fi fits |
+|-------|------------------|
+| **DePIN** | Verify physical infrastructure — EV chargers, nodes, sensors, coverage. |
+| **RWA** | Attest real-world state — inspections, logistics, asset condition. |
+| **DeFi** | Escrow and settlement on Creditcoin; transparent, programmable payouts. |
 
 ---
 
-## Commands
+## 📋 Commands
 
 | Command | Description |
-|--------|-------------|
-| `pnpm dev:web` | Run web app (:3000) |
+|---------|-------------|
+| `pnpm dev:web` | Run web app (localhost:3000) |
 | `pnpm build:web` | Build web app |
-| `pnpm dev:api` | Run Fastify API (:3001) |
+| `pnpm dev:api` | Run Fastify API (localhost:3001) |
 | `pnpm contracts:deploy` | Deploy VeriActEscrow to Creditcoin testnet |
-| `pnpm run deploy:vercel` | Deploy frontend via Vercel CLI (run from repo root; first time run from `apps/web`: `cd apps/web && vercel`) |
+| `pnpm run deploy:vercel` | Deploy frontend via Vercel CLI |
 
 ---
 
-**Before submission:** See [COMPLETION-CHECKLIST.md](./COMPLETION-CHECKLIST.md) for deploy steps and verification.
+## 📄 Docs
 
-**veri.fi** — Prove it. Get paid.
+| File | Purpose |
+|------|---------|
+| [COMPLETION-CHECKLIST.md](./COMPLETION-CHECKLIST.md) | Deploy steps and verification before submission |
+| [PROJECT-DESCRIPTION.md](./PROJECT-DESCRIPTION.md) | Long-form YC-style project description |
+| [VERCEL-DEPLOY.md](./VERCEL-DEPLOY.md) | Vercel settings and troubleshooting |
+| [CREDITCOIN-TESTNET-AUDIT.md](./CREDITCOIN-TESTNET-AUDIT.md) | Testnet config audit and deploy details |
+
+---
+
+<p align="center">
+  <strong>veri.fi</strong> — Prove it. Get paid.
+</p>

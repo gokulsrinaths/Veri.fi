@@ -1,5 +1,5 @@
 /**
- * Contract service — Creditcoin escrow + mock fallback.
+ * Contract service — Creditcoin escrow + fallback when on-chain is unavailable.
  */
 
 import { releaseReward } from "./mockChain";
@@ -24,7 +24,7 @@ export async function settleReward(
         return { success: true, txHash: result.txHash };
       }
     } catch (e) {
-      console.warn("On-chain release failed, using mock:", e);
+      console.warn("On-chain release failed, using fallback:", e);
     }
   }
   const result = releaseReward(taskId, submissionId, rewardAmount);

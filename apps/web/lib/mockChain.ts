@@ -1,5 +1,5 @@
 /**
- * Mock blockchain layer for hackathon demo.
+ * Fallback blockchain layer when contract/env is not configured.
  * Replace with real Creditcoin / EVM integration later.
  */
 

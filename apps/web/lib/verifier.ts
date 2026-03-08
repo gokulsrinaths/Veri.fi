@@ -1,5 +1,5 @@
 /**
- * AI verifier — DeepInfra (Llama vision) or OpenAI Vision when API key present, else mock.
+ * AI verifier — DeepInfra (Llama vision) or OpenAI Vision when API key present, else fallback.
  * Image is checked according to the task (name, description, expected object, location).
  * Score = 0.45 * visual + 0.25 * location + 0.15 * timestamp + 0.15 * antiFraud
  */
@@ -77,7 +77,7 @@ async function visualScoreWithDeepInfra(
   task: Task
 ): Promise<VisualAnalysis> {
   const key = process.env.DEEPINFRA_API_KEY;
-  if (!key) return mockVisualScore(task.expectedObject, imageBase64);
+  if (!key) return fallbackVisualScore(task.expectedObject, imageBase64);
 
   const prompt = buildTaskPrompt(task);
   const imageUrl = `data:image/jpeg;base64,${imageBase64}`;
@@ -107,19 +107,19 @@ async function visualScoreWithDeepInfra(
       }),
     });
 
-    if (!res.ok) return mockVisualScore(task.expectedObject, imageBase64);
+    if (!res.ok) return fallbackVisualScore(task.expectedObject, imageBase64);
 
     const data = (await res.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
     };
     const content = data.choices?.[0]?.message?.content?.trim();
-    if (!content) return mockVisualScore(task.expectedObject, imageBase64);
+    if (!content) return fallbackVisualScore(task.expectedObject, imageBase64);
 
     const parsed = parseVisualResponse(content);
     if (parsed) return parsed;
-    return mockVisualScore(task.expectedObject, imageBase64);
+    return fallbackVisualScore(task.expectedObject, imageBase64);
   } catch {
-    return mockVisualScore(task.expectedObject, imageBase64);
+    return fallbackVisualScore(task.expectedObject, imageBase64);
   }
 }
 
@@ -128,7 +128,7 @@ async function visualScoreWithOpenAI(
   task: Task
 ): Promise<VisualAnalysis> {
   const key = process.env.OPENAI_API_KEY;
-  if (!key) return mockVisualScore(task.expectedObject, imageBase64);
+  if (!key) return fallbackVisualScore(task.expectedObject, imageBase64);
 
   const prompt = buildTaskPrompt(task);
 
@@ -156,19 +156,19 @@ async function visualScoreWithOpenAI(
         ],
       }),
     });
-    if (!res.ok) return mockVisualScore(task.expectedObject, imageBase64);
+    if (!res.ok) return fallbackVisualScore(task.expectedObject, imageBase64);
     const data = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
     const content = data.choices?.[0]?.message?.content?.trim();
-    if (!content) return mockVisualScore(task.expectedObject, imageBase64);
+    if (!content) return fallbackVisualScore(task.expectedObject, imageBase64);
     const parsed = parseVisualResponse(content);
     if (parsed) return parsed;
-    return mockVisualScore(task.expectedObject, imageBase64);
+    return fallbackVisualScore(task.expectedObject, imageBase64);
   } catch {
-    return mockVisualScore(task.expectedObject, imageBase64);
+    return fallbackVisualScore(task.expectedObject, imageBase64);
   }
 }
 
-/** Resolve visual analysis: DeepInfra first, then OpenAI, then mock. */
+/** Resolve visual analysis: DeepInfra first, then OpenAI, then fallback. */
 async function runVisualCheck(imageBase64: string, task: Task): Promise<VisualAnalysis> {
   if (process.env.DEEPINFRA_API_KEY) {
     return visualScoreWithDeepInfra(imageBase64, task);
@@ -176,17 +176,17 @@ async function runVisualCheck(imageBase64: string, task: Task): Promise<VisualAn
   if (process.env.OPENAI_API_KEY) {
     return visualScoreWithOpenAI(imageBase64, task);
   }
-  return mockVisualScore(task.expectedObject, imageBase64);
+  return fallbackVisualScore(task.expectedObject, imageBase64);
 }
 
-function mockVisualScore(expectedObject: string, _imageBase64: string): VisualAnalysis {
+function fallbackVisualScore(expectedObject: string, _imageBase64: string): VisualAnalysis {
   const lower = expectedObject.toLowerCase();
   const hasCharger = lower.includes("ev charger") || lower.includes("charger");
   const confidence = hasCharger ? 0.82 + Math.random() * 0.12 : 0.4 + Math.random() * 0.35;
   return {
     containsExpectedObject: hasCharger || confidence > 0.7,
     confidence: Math.min(1, confidence),
-    sceneSummary: "Mock analysis: image reviewed for expected object.",
+    sceneSummary: "Fallback analysis: image reviewed for expected object.",
     suspiciousSignals: [],
   };
 }
