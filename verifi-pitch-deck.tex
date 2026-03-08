@@ -1,0 +1,149 @@
+% Veri.fi — BUIDL CTC Hackathon Pitch Deck
+% LaTeX Beamer | Compiles on Overleaf | No external files
+
+\documentclass[11pt]{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{structure}{fg=teal!70!black}
+\setbeamercolor{palette primary}{bg=teal!20,fg=black}
+\setbeamercolor{palette secondary}{bg=teal!30,fg=black}
+\setbeamercolor{palette tertiary}{bg=teal!40,fg=black}
+\setbeamercolor{frametitle}{bg=teal!25,fg=black}
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{enumerate items}[default]
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+
+% -----------------------------------------------------------------------------
+\title{Veri.fi}
+\subtitle{AI-Verified Proof of Action on Creditcoin}
+\author{BUIDL CTC Hackathon}
+\institute{Build for the Real World}
+\date{}
+% -----------------------------------------------------------------------------
+
+\begin{document}
+
+% ========== SLIDE 1: Title ==========
+\begin{frame}
+\titlepage
+\vspace{-0.5em}
+\begin{center}
+\large \textbf{Turn real-world activity into programmable proof.}
+\end{center}
+\end{frame}
+
+% ========== SLIDE 2: Problem ==========
+\begin{frame}{Problem}
+Real-world verification is broken:
+\begin{itemize}
+\item Manual verification is \textbf{expensive} and slow
+\item Self-reported proof is \textbf{easy to fake}
+\item Centralized systems create \textbf{trust bottlenecks}
+\item Reward settlement is \textbf{opaque} and off-chain
+\end{itemize}
+\vspace{0.5em}
+Many economically important activities (infrastructure inspections, delivery confirmation, retail checks, field operations, event attendance) remain hard to verify digitally.
+\end{frame}
+
+% ========== SLIDE 3: Solution ==========
+\begin{frame}{Solution}
+Veri.fi: decentralized verification with on-chain settlement.
+\begin{itemize}
+\item \textbf{Task creation} — Sponsors define tasks and lock rewards
+\item \textbf{Proof submission} — Participants submit evidence (photo, GPS, metadata)
+\item \textbf{AI verification} — Backend scores evidence (visual, location, time, anti-fraud)
+\item \textbf{Creditcoin settlement} — Smart contract releases reward when verification passes
+\end{itemize}
+\end{frame}
+
+% ========== SLIDE 4: How It Works ==========
+\begin{frame}{How It Works}
+\begin{center}
+Sponsor creates task \\
+$\downarrow$ \\
+Participant submits evidence \\
+$\downarrow$ \\
+AI verifies (score $\geq$ threshold) \\
+$\downarrow$ \\
+Creditcoin releases reward
+\end{center}
+\vspace{0.5em}
+One flow. Transparent. Programmable.
+\end{frame}
+
+% ========== SLIDE 5: Demo Example ==========
+\begin{frame}{Demo Example}
+\begin{enumerate}
+\item User 1 (sponsor) creates a task and locks reward on Creditcoin
+\item User 2 (participant) completes the task in the real world
+\item User 2 uploads photo proof (and optional GPS)
+\item AI verifies the evidence; score is computed
+\item Creditcoin releases the reward to User 2
+\end{enumerate}
+\vspace{0.5em}
+Task closes. Proof and payout are on-chain.
+\end{frame}
+
+% ========== SLIDE 6: Why Creditcoin ==========
+\begin{frame}{Why Creditcoin}
+\begin{itemize}
+\item \textbf{Escrow} — Rewards held on-chain until verification passes
+\item \textbf{Transparent settlement} — Anyone can see when and why rewards are released
+\item \textbf{Programmable incentives} — Tasks and thresholds are set by sponsors; protocol executes
+\item \textbf{On-chain auditability} — Evidence hash and verification result can be attested
+\end{itemize}
+\end{frame}
+
+% ========== SLIDE 7: Hackathon Track Fit ==========
+\begin{frame}{Hackathon Track Fit}
+\textbf{BUIDL CTC — Build for the Real World}
+\vspace{0.5em}
+\begin{itemize}
+\item \textbf{DePIN} — Verify physical infrastructure (EV chargers, telecom nodes, sensors)
+\item \textbf{RWA} — Validate physical assets, field inspections, logistics events
+\item \textbf{DeFi-adjacent settlement} — Escrow and automated reward release on Creditcoin
+\end{itemize}
+\vspace{0.5em}
+Strong fit for real-world coordination and verification.
+\end{frame}
+
+% ========== SLIDE 8: Architecture ==========
+\begin{frame}{Architecture}
+\begin{itemize}
+\item \textbf{Frontend} — Next.js; task creation, proof upload, dashboard
+\item \textbf{Verification backend} — API routes; scoring and orchestration
+\item \textbf{AI analysis} — Vision (DeepInfra/OpenAI), location and timestamp checks
+\item \textbf{Evidence storage} — Supabase (optional); proof images and metadata
+\item \textbf{Creditcoin} — VeriActEscrow; escrow and payout on testnet
+\end{itemize}
+\end{frame}
+
+% ========== SLIDE 9: Use Cases ==========
+\begin{frame}{Use Cases}
+\begin{itemize}
+\item EV charger verification
+\item Logistics and delivery confirmation
+\item Retail and store audits
+\item Field inspections and asset condition
+\item Community and event data collection
+\end{itemize}
+\vspace{0.5em}
+Any real-world activity that can be evidenced and scored.
+\end{frame}
+
+% ========== SLIDE 10: Closing ==========
+\begin{frame}{Closing}
+\begin{center}
+\Large \textbf{Veri.fi} \\
+\large Turn real-world activity into programmable proof. \\
+\vspace{1em}
+Proof it $\rightarrow$ We verify it $\rightarrow$ You get paid. \\
+\vspace{1em}
+\textbf{Build for the Real World.}
+\end{center}
+\end{frame}
+
+\end{document}

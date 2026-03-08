@@ -5,6 +5,7 @@
 export type TaskStatus = "OPEN" | "CLOSED" | "EXPIRED";
 export type SubmissionStatus = "PENDING" | "VERIFYING" | "VERIFIED" | "REJECTED" | "PAID";
 export type RequiredEvidenceType = "Photo" | "Video" | "Photo + GPS";
+export type LocationType = "online" | "physical";
 
 export interface Task {
   id: string;
@@ -23,8 +24,8 @@ export interface Task {
   onchainTaskId?: number;
   /** Tx hash when reward was escrowed */
   escrowTxHash?: string;
-  targetLatitude?: number;
-  targetLongitude?: number;
+  targetLatitude?: number | null;
+  targetLongitude?: number | null;
   radiusMeters?: number;
 }
 

@@ -27,7 +27,7 @@ export default function DemoPage() {
             EV Charger verification demo
           </h1>
           <p className="text-white/60 text-sm">
-            One flow: open the seed task, upload a photo (with optional manual lat/lng), get verified and see mock reward.
+            One flow: open the seed task, upload a photo (with optional manual lat/lng), get verified and see the reward.
           </p>
         </motion.div>
 
@@ -36,7 +36,7 @@ export default function DemoPage() {
           <li>Upload a photo (EV charger or any image for testing).</li>
           <li>Optionally enter manual latitude/longitude (e.g. 37.44, -122.14 for Palo Alto).</li>
           <li>Submit — backend runs verification (visual, location, timestamp, anti-fraud).</li>
-          <li>If score ≥ threshold, reward is released; result page shows mock tx hash.</li>
+          <li>If score ≥ threshold, reward is released; result page shows the transaction hash.</li>
         </ol>
 
         <Link

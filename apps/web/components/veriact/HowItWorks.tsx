@@ -17,7 +17,7 @@ const steps = [
   {
     num: 3,
     title: "Verify & get paid",
-    desc: "AI + rules verify; score vs threshold determines payout. Settlement on Creditcoin testnet or mock for demo.",
+    desc: "AI + rules verify; score vs threshold determines payout. Settlement on Creditcoin testnet or fallback when not configured.",
   },
 ];
 

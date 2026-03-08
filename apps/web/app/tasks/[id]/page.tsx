@@ -1,22 +1,32 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { MapPin, Coins, FileImage, Target, Wallet, Loader2 } from "lucide-react";
+import { MapPin, Coins, FileImage, Target, Wallet, Loader2, Pencil, Trash2 } from "lucide-react";
 import { Navbar, ProofUploadCard, StatusBadge } from "@/components/veriact";
 import { CreditcoinWallet } from "@/components/CreditcoinWallet";
 import { useWallet } from "@/components/WalletContext";
 import { tasksApi } from "@/lib/veriact-api";
+import { useToast } from "@/components/ToastContext";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Task } from "@/types/veriact";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+function shortenWallet(addr: string) {
+  if (!addr || addr.length < 12) return addr;
+  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+}
+
 export default function TaskDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
-  const { isConnected } = useWallet();
+  const { isConnected, address } = useWallet();
+  const queryClient = useQueryClient();
+  const toast = useToast();
 
   const { data: task, isLoading } = useQuery({
     queryKey: ["task", id],
@@ -25,6 +35,23 @@ export default function TaskDetailPage() {
   });
 
   const t = task as Task | undefined;
+  const isOwner = address && t?.sponsorWallet && address.toLowerCase() === t.sponsorWallet.toLowerCase();
+
+  const deleteMutation = useMutation({
+    mutationFn: () => tasksApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast("Task removed");
+      router.push("/tasks");
+    },
+    onError: (e) => toast(e instanceof Error ? e.message : "Failed to remove task"),
+  });
+
+  const handleRemove = () => {
+    if (confirm("Remove this task? This cannot be undone and any submissions will be deleted.")) {
+      deleteMutation.mutate();
+    }
+  };
 
   if (!isConnected) {
     return (
@@ -113,7 +140,33 @@ export default function TaskDetailPage() {
                   <Target className="h-4 w-4" />
                   Threshold: {(t.threshold * 100).toFixed(0)}% · Verify: {t.expectedObject}
                 </p>
+                {t.sponsorWallet && (
+                  <p className="flex items-center gap-2 pt-1 border-t border-border/60">
+                    <Wallet className="h-4 w-4" />
+                    Created by {shortenWallet(t.sponsorWallet)}
+                  </p>
+                )}
               </div>
+              {isOwner && (
+                <div className="flex flex-wrap gap-2 pt-4 border-t border-border/60">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/tasks/${t.id}/edit`} className="gap-1.5">
+                      <Pencil className="h-3.5 w-3.5" />
+                      Edit task
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-destructive border-destructive/50 hover:bg-destructive/10"
+                    onClick={handleRemove}
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Remove task
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>

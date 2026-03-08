@@ -118,8 +118,8 @@ export async function createTask(input: Omit<Task, "id" | "createdAt" | "status"
     reward_amount: input.rewardAmount ?? "5 CTC",
     threshold: input.threshold ?? 0.7,
     expected_object: input.expectedObject ?? "EV Charger",
-    target_latitude: input.targetLatitude ?? 37.4419,
-    target_longitude: input.targetLongitude ?? -122.143,
+    target_latitude: typeof input.targetLatitude === "number" ? input.targetLatitude : null,
+    target_longitude: typeof input.targetLongitude === "number" ? input.targetLongitude : null,
     radius_meters: input.radiusMeters ?? 200,
     onchain_task_id: input.onchainTaskId ?? null,
     escrow_tx_hash: input.escrowTxHash ?? null,
@@ -127,6 +127,48 @@ export async function createTask(input: Omit<Task, "id" | "createdAt" | "status"
   const { data, error } = await supabase.from("tasks").insert(row).select().single();
   if (error) throw new Error(error.message);
   return rowToTask(data);
+}
+
+export type TaskUpdateInput = Partial<Pick<Task, "name" | "description" | "expectedLocation" | "requiredEvidenceType" | "rewardAmount" | "threshold" | "expectedObject" | "status" | "targetLatitude" | "targetLongitude" | "radiusMeters">>;
+
+export async function updateTask(id: string, input: TaskUpdateInput): Promise<Task | undefined> {
+  if (!isSupabaseConfigured()) {
+    const task = tasksMem.get(id);
+    if (!task) return undefined;
+    const next = { ...task, ...input };
+    tasksMem.set(id, next);
+    return next;
+  }
+  const supabase = getSupabaseClient();
+  const row: Record<string, unknown> = {};
+  if (input.name != null) row.name = input.name;
+  if (input.description != null) row.description = input.description;
+  if (input.expectedLocation != null) row.expected_location = input.expectedLocation;
+  if (input.requiredEvidenceType != null) row.required_evidence_type = input.requiredEvidenceType;
+  if (input.rewardAmount != null) row.reward_amount = input.rewardAmount;
+  if (input.threshold != null) row.threshold = input.threshold;
+  if (input.expectedObject != null) row.expected_object = input.expectedObject;
+  if (input.status != null) row.status = input.status;
+  if (input.targetLatitude !== undefined) row.target_latitude = input.targetLatitude;
+  if (input.targetLongitude !== undefined) row.target_longitude = input.targetLongitude;
+  if (input.radiusMeters != null) row.radius_meters = input.radiusMeters;
+  row.updated_at = new Date().toISOString();
+  const { data, error } = await supabase.from("tasks").update(row).eq("id", id).select().single();
+  if (error) return undefined;
+  return rowToTask(data);
+}
+
+export async function deleteTask(id: string): Promise<boolean> {
+  if (!isSupabaseConfigured()) {
+    tasksMem.delete(id);
+    Array.from(submissionsMem.entries()).forEach(([sid, s]) => {
+      if (s.taskId === id) submissionsMem.delete(sid);
+    });
+    return true;
+  }
+  const supabase = getSupabaseClient();
+  const { error } = await supabase.from("tasks").delete().eq("id", id);
+  return !error;
 }
 
 export async function addSubmission(

@@ -202,30 +202,38 @@ export function ProofUploadCard({ task }: { task: Task }) {
               <Label id="proof-location-label">
                 Location (if your photo doesn&apos;t include GPS)
               </Label>
-              <p className="text-xs text-muted-foreground">
-                Enter latitude and longitude if the image has no location
-                metadata.
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                <Input
-                  id="proof-lat"
-                  type="number"
-                  step="any"
-                  value={manualLat}
-                  onChange={(e) => setManualLat(e.target.value)}
-                  placeholder="Latitude"
-                  aria-labelledby="proof-location-label"
-                />
-                <Input
-                  id="proof-lng"
-                  type="number"
-                  step="any"
-                  value={manualLng}
-                  onChange={(e) => setManualLng(e.target.value)}
-                  placeholder="Longitude"
-                  aria-labelledby="proof-location-label"
-                />
-              </div>
+              {task.targetLatitude != null && task.targetLongitude != null ? (
+                <>
+                  <p className="text-xs text-muted-foreground">
+                    Enter latitude and longitude if the image has no location
+                    metadata.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input
+                      id="proof-lat"
+                      type="number"
+                      step="any"
+                      value={manualLat}
+                      onChange={(e) => setManualLat(e.target.value)}
+                      placeholder="Latitude"
+                      aria-labelledby="proof-location-label"
+                    />
+                    <Input
+                      id="proof-lng"
+                      type="number"
+                      step="any"
+                      value={manualLng}
+                      onChange={(e) => setManualLng(e.target.value)}
+                      placeholder="Longitude"
+                      aria-labelledby="proof-location-label"
+                    />
+                  </div>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  This task is online; location is not checked.
+                </p>
+              )}
             </div>
             {task.onchainTaskId != null && (
               <Alert variant="success" className="border-primary/30 bg-primary/10">

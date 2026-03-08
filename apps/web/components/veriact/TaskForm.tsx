@@ -12,7 +12,7 @@ import {
   parseRewardToWei,
   connectWallet,
 } from "@/lib/creditcoin";
-import type { RequiredEvidenceType } from "@/types/veriact";
+import type { RequiredEvidenceType, Task, LocationType } from "@/types/veriact";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,31 +34,82 @@ const EVIDENCE_OPTIONS: RequiredEvidenceType[] = [
   "Photo + GPS",
 ];
 
-export function TaskForm() {
+const defaultForm = {
+  name: "Verify EV Charger #21",
+  description:
+    "Confirm that EV Charger #21 is physically present and operational at the specified location.",
+  locationType: "physical" as LocationType,
+  expectedLocation: "Palo Alto EV Station",
+  targetLatitude: 37.4419,
+  targetLongitude: -122.143,
+  requiredEvidenceType: "Photo + GPS" as RequiredEvidenceType,
+  rewardAmount: "5 CTC",
+  threshold: 0.7,
+  expectedObject: "EV Charger",
+};
+
+export function TaskForm({ editTask }: { editTask?: Task | null }) {
   const router = useRouter();
   const toast = useToast();
   const { address: sponsorWallet } = useWallet();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState({
-    name: "Verify EV Charger #21",
-    description:
-      "Confirm that EV Charger #21 is physically present and operational at the specified location.",
-    expectedLocation: "Palo Alto EV Station",
-    requiredEvidenceType: "Photo + GPS" as RequiredEvidenceType,
-    rewardAmount: "5 CTC",
-    threshold: 0.7,
-    expectedObject: "EV Charger",
-  });
+  const [form, setForm] = useState(() =>
+    editTask
+      ? {
+          name: editTask.name,
+          description: editTask.description,
+          locationType: (editTask.targetLatitude != null && editTask.targetLongitude != null
+            ? "physical"
+            : "online") as LocationType,
+          expectedLocation: editTask.expectedLocation,
+          targetLatitude: editTask.targetLatitude ?? 37.4419,
+          targetLongitude: editTask.targetLongitude ?? -122.143,
+          requiredEvidenceType: editTask.requiredEvidenceType,
+          rewardAmount: editTask.rewardAmount,
+          threshold: editTask.threshold,
+          expectedObject: editTask.expectedObject,
+        }
+      : defaultForm
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const contractAddress = process.env.NEXT_PUBLIC_VERIACT_ESCROW_ADDRESS;
-    const useEscrow = !!contractAddress;
+
+    if (form.locationType === "physical") {
+      const lat = form.targetLatitude;
+      const lng = form.targetLongitude;
+      if (lat == null || lng == null || Number.isNaN(lat) || Number.isNaN(lng)) {
+        setError("Latitude and longitude are required for physical location tasks.");
+        setLoading(false);
+        return;
+      }
+    }
 
     try {
+      if (editTask) {
+        await tasksApi.update(editTask.id, {
+          name: form.name,
+          description: form.description,
+          expectedLocation: form.expectedLocation,
+          requiredEvidenceType: form.requiredEvidenceType,
+          rewardAmount: form.rewardAmount,
+          threshold: form.threshold,
+          expectedObject: form.expectedObject,
+          ...(form.locationType === "physical"
+            ? { targetLatitude: form.targetLatitude, targetLongitude: form.targetLongitude }
+            : { targetLatitude: null, targetLongitude: null }),
+        });
+        toast("Task updated");
+        router.push(`/tasks/${editTask.id}`);
+        return;
+      }
+
+      const contractAddress = process.env.NEXT_PUBLIC_VERIACT_ESCROW_ADDRESS;
+      const useEscrow = !!contractAddress;
+
       let onchainTaskId: number | undefined;
       let escrowTxHash: string | undefined;
 
@@ -87,12 +138,15 @@ export function TaskForm() {
         sponsorWallet: sponsorWallet ?? null,
         onchainTaskId,
         escrowTxHash,
+        ...(form.locationType === "physical"
+          ? { targetLatitude: form.targetLatitude, targetLongitude: form.targetLongitude }
+          : { targetLatitude: null, targetLongitude: null }),
       });
       toast("Task created");
       router.push("/tasks");
       return;
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to create task";
+      const msg = e instanceof Error ? e.message : "Failed to save task";
       if (msg.includes("MetaMask") || msg.includes("connect")) {
         setError("Connect wallet to create task");
       } else {
@@ -112,10 +166,10 @@ export function TaskForm() {
       <Card>
         <CardHeader>
           <h2 className="text-xl font-semibold text-foreground">
-            Create a new task
+            {editTask ? "Edit task" : "Create a new task"}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Define the task, reward, and verification threshold.
+            {editTask ? "Update the task details below." : "Define the task, reward, and verification threshold."}
           </p>
         </CardHeader>
         <CardContent>
@@ -146,6 +200,27 @@ export function TaskForm() {
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="task-location-type">Location type</Label>
+              <Select
+                value={form.locationType}
+                onValueChange={(v) =>
+                  setForm((f) => ({
+                    ...f,
+                    locationType: v as LocationType,
+                    ...(v === "online" ? { targetLatitude: undefined, targetLongitude: undefined } : {}),
+                  }))
+                }
+              >
+                <SelectTrigger id="task-location-type">
+                  <SelectValue placeholder="Choose…" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="online">Online (no lat/long check)</SelectItem>
+                  <SelectItem value="physical">Physical (require latitude & longitude)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="task-location">Expected location</Label>
               <Input
                 id="task-location"
@@ -153,10 +228,48 @@ export function TaskForm() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, expectedLocation: e.target.value }))
                 }
-                placeholder="e.g. Palo Alto EV Station"
+                placeholder={form.locationType === "online" ? "e.g. Online / Anywhere" : "e.g. Palo Alto EV Station"}
                 required
               />
             </div>
+            {form.locationType === "physical" && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="task-lat">Latitude (required for physical)</Label>
+                  <Input
+                    id="task-lat"
+                    type="number"
+                    step="any"
+                    value={form.targetLatitude ?? ""}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        targetLatitude: e.target.value === "" ? undefined : Number(e.target.value),
+                      }))
+                    }
+                    placeholder="e.g. 37.4419"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="task-lng">Longitude (required for physical)</Label>
+                  <Input
+                    id="task-lng"
+                    type="number"
+                    step="any"
+                    value={form.targetLongitude ?? ""}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        targetLongitude: e.target.value === "" ? undefined : Number(e.target.value),
+                      }))
+                    }
+                    placeholder="e.g. -122.143"
+                    required
+                  />
+                </div>
+              </>
+            )}
             <div className="space-y-2">
               <Label htmlFor="task-evidence-type">Required evidence type</Label>
               <Select
@@ -243,10 +356,10 @@ export function TaskForm() {
               {loading ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-                  Creating…
+                  {editTask ? "Saving…" : "Creating…"}
                 </>
               ) : (
-                "Create task"
+                editTask ? "Save changes" : "Create task"
               )}
             </Button>
           </form>

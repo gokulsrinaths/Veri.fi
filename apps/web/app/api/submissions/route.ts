@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { addSubmission, getSubmission, updateSubmission, getTask, insertVerificationResult } from "@/lib/store";
+import { addSubmission, getSubmission, updateSubmission, getTask, updateTask, insertVerificationResult } from "@/lib/store";
 import { uploadProofImage } from "@/lib/storage";
 import { extractExif } from "@/lib/exif";
 import { runVerification } from "@/lib/verifier";
@@ -90,6 +90,7 @@ export async function POST(request: Request) {
         participantAddress: submission.participantAddress ?? undefined,
       });
       await updateSubmission(submission.id, { status: "PAID", txHash: settlement.txHash ?? null });
+      await updateTask(taskId, { status: "CLOSED" });
     }
 
     const updated = await getSubmission(submission.id);

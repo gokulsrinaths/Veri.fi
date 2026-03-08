@@ -27,8 +27,8 @@ export async function POST(request: Request) {
       threshold: number;
       expectedObject: string;
       sponsorWallet?: string | null;
-      targetLatitude?: number;
-      targetLongitude?: number;
+      targetLatitude?: number | null;
+      targetLongitude?: number | null;
       radiusMeters?: number;
       onchainTaskId?: number;
       escrowTxHash?: string;
@@ -42,8 +42,8 @@ export async function POST(request: Request) {
       threshold: typeof body.threshold === "number" ? body.threshold : 0.7,
       expectedObject: body.expectedObject ?? "EV Charger",
       sponsorWallet: body.sponsorWallet ?? null,
-      targetLatitude: body.targetLatitude ?? 37.4419,
-      targetLongitude: body.targetLongitude ?? -122.143,
+      targetLatitude: typeof body.targetLatitude === "number" ? body.targetLatitude : null,
+      targetLongitude: typeof body.targetLongitude === "number" ? body.targetLongitude : null,
       radiusMeters: body.radiusMeters ?? 200,
       onchainTaskId: body.onchainTaskId,
       escrowTxHash: body.escrowTxHash,

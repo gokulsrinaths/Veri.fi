@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SkipLink } from "@/components/SkipLink";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { Footer } from "@/components/veriact";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -12,7 +13,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Veri.fi — AI-verified proof of action on Creditcoin",
+  title: "veri.fi — AI-verified proof of action on Creditcoin",
   description: "Turn real-world activity into programmable proof. Create tasks, submit proof, get verified.",
 };
 
@@ -24,13 +25,16 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${outfit.variable} font-sans antialiased min-h-screen`}
+        className={`${outfit.variable} font-sans antialiased min-h-screen flex flex-col`}
         style={{ backgroundColor: "#0a0a0a", color: "#f4f4f5" }}
       >
         <ErrorBoundary>
           <Providers>
             <SkipLink />
-            {children}
+            <div className="flex flex-col min-h-screen">
+              <div className="flex-1">{children}</div>
+              <Footer />
+            </div>
           </Providers>
         </ErrorBoundary>
       </body>

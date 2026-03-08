@@ -18,7 +18,8 @@
     "db:seed": "pnpm --filter api exec tsx prisma/seed.ts",
     "db:studio": "pnpm --filter api exec prisma studio",
     "contracts:compile": "pnpm --filter contracts compile",
-    "contracts:deploy": "pnpm --filter contracts deploy"
+    "contracts:deploy": "pnpm --filter contracts deploy",
+    "deploy:vercel": "cd apps/web && vercel deploy"
   },
   "devDependencies": {
     "typescript": "5.3.3"

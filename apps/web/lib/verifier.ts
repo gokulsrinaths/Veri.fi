@@ -231,12 +231,18 @@ export async function runVerification(input: VerifyInput): Promise<VerifyResult>
   const targetLng = task.targetLongitude ?? -122.14;
   const radius = task.radiusMeters ?? 200;
 
-  let locationScore = 0;
-  if (lat != null && lng != null) {
-    const dist = haversineMeters(targetLat, targetLng, lat, lng);
-    if (dist <= radius) locationScore = 1;
-    else locationScore = Math.max(0, 1 - (dist - radius) / (radius * 2));
+  let locationScore = 1;
+  const isPhysicalLocation = task.targetLatitude != null && task.targetLongitude != null;
+  if (isPhysicalLocation) {
+    if (lat != null && lng != null) {
+      const dist = haversineMeters(targetLat, targetLng, lat, lng);
+      if (dist <= radius) locationScore = 1;
+      else locationScore = Math.max(0, 1 - (dist - radius) / (radius * 2));
+    } else {
+      locationScore = 0;
+    }
   }
+  // Online tasks: no lat/long check, full location score
 
   let timestampScore = 0.9;
   if (exifDateTime) {

@@ -60,7 +60,7 @@ export function SettlementCard({
             </div>
             {txHash && (
               <p className="text-xs text-muted-foreground font-mono break-all">
-                Mock tx (demo only): {txHash}
+                Transaction: {txHash}
               </p>
             )}
           </div>

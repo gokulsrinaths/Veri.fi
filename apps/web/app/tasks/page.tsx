@@ -12,7 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Wallet } from "lucide-react";
 
 export default function TasksPage() {
-  const { isConnected } = useWallet();
+  const { isConnected, address } = useWallet();
   const { data, isLoading } = useQuery({
     queryKey: ["tasks"],
     queryFn: () => tasksApi.list("OPEN"),
@@ -64,7 +64,7 @@ export default function TasksPage() {
         ) : (
           <div className="space-y-4">
             {tasks.map((task, i) => (
-              <TaskCard key={task.id} task={task} index={i} />
+              <TaskCard key={task.id} task={task} index={i} currentWallet={address} />
             ))}
           </div>
         )}

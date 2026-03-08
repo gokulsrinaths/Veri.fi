@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, ListTodo, PlusCircle, Menu, Zap } from "lucide-react";
+import { LayoutDashboard, ListTodo, PlusCircle, Menu, Zap, BookOpen, GitBranch } from "lucide-react";
 import { CreditcoinWallet } from "@/components/CreditcoinWallet";
 import { useWallet } from "@/components/WalletContext";
 import { Button } from "@/components/ui/button";
@@ -77,6 +77,28 @@ export function Navbar() {
     </Link>
   );
 
+  const protocolLink = (
+    <Link
+      href="/protocol"
+      className={linkClass(pathname === "/protocol")}
+      onClick={() => setOpen(false)}
+    >
+      <BookOpen className="h-4 w-4 shrink-0" aria-hidden />
+      <span>Protocol</span>
+    </Link>
+  );
+
+  const howItWorksLink = (
+    <Link
+      href="/how-it-works"
+      className={linkClass(pathname === "/how-it-works")}
+      onClick={() => setOpen(false)}
+    >
+      <GitBranch className="h-4 w-4 shrink-0" aria-hidden />
+      <span>How it works</span>
+    </Link>
+  );
+
   return (
     <nav
       className="sticky top-0 z-40 border-b border-zinc-800 px-4 py-3"
@@ -127,6 +149,8 @@ export function Navbar() {
                 {isConnected && dashboardLink}
                 {exploreTasksLink}
                 {createTaskLink}
+                {protocolLink}
+                {howItWorksLink}
                 {demoLink}
                 <div className="pt-4 border-t border-zinc-800">
                   <CreditcoinWallet />

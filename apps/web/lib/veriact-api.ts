@@ -37,6 +37,20 @@ export const tasksApi = {
     onchainTaskId?: number;
     escrowTxHash?: string;
   }) => api<unknown>("/tasks", { method: "POST", body: JSON.stringify(body) }),
+  update: (id: string, body: Partial<{
+    name: string;
+    description: string;
+    expectedLocation: string;
+    requiredEvidenceType: string;
+    rewardAmount: string;
+    threshold: number;
+    expectedObject: string;
+    status: string;
+    targetLatitude: number;
+    targetLongitude: number;
+    radiusMeters: number;
+  }>) => api<unknown>(`/tasks/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+  delete: (id: string) => api<{ deleted: boolean }>(`/tasks/${id}`, { method: "DELETE" }),
 };
 
 export const submissionsApi = {

@@ -4,8 +4,12 @@ import Link from "next/link";
 import {
   Navbar,
   HeroSection,
-  FeatureCards,
-  HowItWorks,
+  ProblemSection,
+  SolutionSection,
+  LandingArchitectureSection,
+  HackathonAlignmentSection,
+  WhyCreditcoinSection,
+  DemoWalkthroughSection,
 } from "@/components/veriact";
 import { HomeConnectWallet } from "@/components/HomeConnectWallet";
 
@@ -18,14 +22,13 @@ export default function HomePage() {
       <Navbar />
       <main id="main-content" className="max-w-6xl mx-auto">
         <HeroSection />
-        <section
-          className="border-t border-zinc-800/80 rounded-none md:rounded-2xl overflow-hidden"
-          style={{ backgroundColor: "#0a0a0a" }}
-        >
-          <FeatureCards />
-          <HowItWorks />
-        </section>
-        <section className="px-4 py-14 md:py-20 text-center">
+        <ProblemSection />
+        <SolutionSection />
+        <LandingArchitectureSection />
+        <HackathonAlignmentSection />
+        <WhyCreditcoinSection />
+        <DemoWalkthroughSection />
+        <section className="px-4 py-14 md:py-20 text-center border-t border-zinc-800/80">
           <p
             className="mb-6 max-w-lg mx-auto"
             style={{ color: "#a1a1aa" }}

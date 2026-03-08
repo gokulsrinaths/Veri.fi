@@ -13,13 +13,13 @@ const features = [
   {
     title: "AI Verification",
     description:
-      "Visual + location + timestamp + anti-fraud scoring. DeepInfra or OpenAI Vision when configured; mock verifier otherwise.",
+      "Visual + location + timestamp + anti-fraud scoring. DeepInfra or OpenAI Vision when configured; fallback verifier otherwise.",
     icon: Cpu,
   },
   {
     title: "On-Chain Settlement",
     description:
-      "Verified proofs trigger reward release. Creditcoin testnet when configured; mock settlement for demo.",
+      "Verified proofs trigger reward release. Creditcoin testnet when configured; fallback when escrow is not set up.",
     icon: Coins,
   },
 ];

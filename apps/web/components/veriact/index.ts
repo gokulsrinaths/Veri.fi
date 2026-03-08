@@ -1,7 +1,14 @@
 export { Navbar } from "./Navbar";
+export { Footer } from "./Footer";
 export { HeroSection } from "./HeroSection";
 export { FeatureCards } from "./FeatureCards";
 export { HowItWorks } from "./HowItWorks";
+export { ProblemSection } from "./ProblemSection";
+export { SolutionSection } from "./SolutionSection";
+export { LandingArchitectureSection } from "./LandingArchitectureSection";
+export { HackathonAlignmentSection } from "./HackathonAlignmentSection";
+export { WhyCreditcoinSection } from "./WhyCreditcoinSection";
+export { DemoWalkthroughSection } from "./DemoWalkthroughSection";
 export { StatusBadge } from "./StatusBadge";
 export { TaskCard } from "./TaskCard";
 export { EmptyState } from "./EmptyState";
