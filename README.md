@@ -1,8 +1,7 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/veri.fi-34d399?style=for-the-badge&labelColor=0a0a0a" alt="veri.fi" />
+  <img src="assets/verifi-logo.png" alt="veri.fi" width="280" />
 </p>
 
-<h1 align="center">veri.fi</h1>
 <p align="center">
   <strong>Turn real-world activity into programmable proof.</strong>
 </p>
