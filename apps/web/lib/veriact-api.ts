@@ -22,36 +22,42 @@ export const tasksApi = {
       status ? `/tasks?status=${encodeURIComponent(status)}` : "/tasks"
     ),
   get: (id: string) => api<unknown>(`/tasks/${id}`),
-  create: (body: {
-    name: string;
-    description: string;
-    expectedLocation: string;
-    requiredEvidenceType: string;
-    rewardAmount: string;
-    threshold: number;
-    expectedObject: string;
-    sponsorWallet?: string | null;
-    targetLatitude?: number;
-    targetLongitude?: number;
-    radiusMeters?: number;
-    onchainTaskId?: number;
-    escrowTxHash?: string;
-  }) => api<unknown>("/tasks", { method: "POST", body: JSON.stringify(body) }),
-  update: (id: string, body: Partial<{
-    name: string;
-    description: string;
-    expectedLocation: string;
-    requiredEvidenceType: string;
-    rewardAmount: string;
-    threshold: number;
-    expectedObject: string;
-    status: string;
-    targetLatitude: number | null;
-    targetLongitude: number | null;
-    radiusMeters: number;
-  }>) => api<unknown>(`/tasks/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+  create: (body: TaskCreateBody) =>
+    api<unknown>("/tasks", { method: "POST", body: JSON.stringify(body) }),
+  update: (id: string, body: TaskUpdateBody) =>
+    api<unknown>(`/tasks/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
   delete: (id: string) => api<{ deleted: boolean }>(`/tasks/${id}`, { method: "DELETE" }),
 };
+
+export type TaskCreateBody = {
+  name: string;
+  description: string;
+  expectedLocation: string;
+  requiredEvidenceType: string;
+  rewardAmount: string;
+  threshold: number;
+  expectedObject: string;
+  sponsorWallet?: string | null;
+  targetLatitude?: number | null;
+  targetLongitude?: number | null;
+  radiusMeters?: number;
+  onchainTaskId?: number;
+  escrowTxHash?: string;
+};
+
+export type TaskUpdateBody = Partial<{
+  name: string;
+  description: string;
+  expectedLocation: string;
+  requiredEvidenceType: string;
+  rewardAmount: string;
+  threshold: number;
+  expectedObject: string;
+  status: string;
+  targetLatitude: number | null;
+  targetLongitude: number | null;
+  radiusMeters: number;
+}>;
 
 export const submissionsApi = {
   create: (formData: FormData) =>

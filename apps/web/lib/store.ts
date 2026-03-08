@@ -77,6 +77,7 @@ export async function getTasks(status?: Task["status"]): Promise<Task[]> {
     return list;
   }
   const supabase = getSupabaseClient();
+  if (!supabase) throw new Error("Supabase not configured");
   let query = supabase.from("tasks").select("*").order("created_at", { ascending: false });
   if (status) query = query.eq("status", status);
   const { data, error } = await query;
@@ -91,6 +92,7 @@ export async function getTask(id: string): Promise<Task | undefined> {
     return tasksMem.get(id);
   }
   const supabase = getSupabaseClient();
+  if (!supabase) throw new Error("Supabase not configured");
   const { data, error } = await supabase.from("tasks").select("*").eq("id", id).single();
   if (error || !data) return undefined;
   return rowToTask(data);
@@ -109,6 +111,7 @@ export async function createTask(input: Omit<Task, "id" | "createdAt" | "status"
     return task;
   }
   const supabase = getSupabaseClient();
+  if (!supabase) throw new Error("Supabase not configured");
   const row = {
     sponsor_wallet: input.sponsorWallet ?? null,
     name: input.name,
@@ -140,6 +143,7 @@ export async function updateTask(id: string, input: TaskUpdateInput): Promise<Ta
     return next;
   }
   const supabase = getSupabaseClient();
+  if (!supabase) throw new Error("Supabase not configured");
   const row: Record<string, unknown> = {};
   if (input.name != null) row.name = input.name;
   if (input.description != null) row.description = input.description;
@@ -167,6 +171,7 @@ export async function deleteTask(id: string): Promise<boolean> {
     return true;
   }
   const supabase = getSupabaseClient();
+  if (!supabase) throw new Error("Supabase not configured");
   const { error } = await supabase.from("tasks").delete().eq("id", id);
   return !error;
 }
@@ -198,6 +203,7 @@ export async function addSubmission(
     return submission;
   }
   const supabase = getSupabaseClient();
+  if (!supabase) throw new Error("Supabase not configured");
   const row = {
     task_id: taskId,
     participant_address: data.participantAddress ?? null,
@@ -217,6 +223,7 @@ export async function getSubmission(id: string): Promise<Submission | undefined>
     return submissionsMem.get(id);
   }
   const supabase = getSupabaseClient();
+  if (!supabase) throw new Error("Supabase not configured");
   const { data, error } = await supabase.from("submissions").select("*").eq("id", id).single();
   if (error || !data) return undefined;
   return rowToSubmission(data);
@@ -234,6 +241,7 @@ export async function updateSubmission(
     return next;
   }
   const supabase = getSupabaseClient();
+  if (!supabase) throw new Error("Supabase not configured");
   const row: Record<string, unknown> = {};
   if (update.status != null) row.status = update.status;
   if (update.verificationScore != null) row.verification_score = update.verificationScore;
@@ -252,6 +260,7 @@ export async function getSubmissionsByTaskId(taskId: string): Promise<Submission
     return Array.from(submissionsMem.values()).filter((s) => s.taskId === taskId);
   }
   const supabase = getSupabaseClient();
+  if (!supabase) throw new Error("Supabase not configured");
   const { data, error } = await supabase
     .from("submissions")
     .select("*")
@@ -296,6 +305,7 @@ export async function getDashboardStats(): Promise<{
     };
   }
   const supabase = getSupabaseClient();
+  if (!supabase) throw new Error("Supabase not configured");
   const [tasksRes, subsRes] = await Promise.all([
     supabase.from("tasks").select("id, name, reward_amount"),
     supabase.from("submissions").select("id, task_id, status, submitted_at, verification_score").order("submitted_at", { ascending: false }).limit(100),
@@ -319,10 +329,10 @@ export async function getDashboardStats(): Promise<{
     recentActivity: recent.map((s) => {
       const task = taskMap.get(s.task_id);
       return {
-        id: s.id,
-        taskName: task?.name ?? "Unknown",
-        status: s.status,
-        submittedAt: s.submitted_at,
+        id: String(s.id),
+        taskName: task?.name != null ? String(task.name) : "Unknown",
+        status: String(s.status),
+        submittedAt: String(s.submitted_at),
         score: s.verification_score != null ? Number(s.verification_score) : undefined,
       };
     }),
@@ -344,6 +354,7 @@ export async function insertVerificationResult(
 ): Promise<void> {
   if (!isSupabaseConfigured()) return;
   const supabase = getSupabaseClient();
+  if (!supabase) return;
   await supabase.from("verification_results").insert({
     submission_id: submissionId,
     visual_score: result.visualScore,

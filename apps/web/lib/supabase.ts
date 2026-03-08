@@ -19,7 +19,7 @@ function getSupabase() {
   });
 }
 
-let client: ReturnType<typeof createClient> | null = null;
+let client: ReturnType<typeof getSupabase> | null = null;
 
 export function getSupabaseClient() {
   if (!client) {

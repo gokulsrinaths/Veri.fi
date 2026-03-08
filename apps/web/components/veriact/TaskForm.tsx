@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
-import { tasksApi } from "@/lib/veriact-api";
+import { tasksApi, type TaskUpdateBody } from "@/lib/veriact-api";
 import { useToast } from "@/components/ToastContext";
 import { useWallet } from "@/components/WalletContext";
 import {
@@ -34,7 +34,20 @@ const EVIDENCE_OPTIONS: RequiredEvidenceType[] = [
   "Photo + GPS",
 ];
 
-const defaultForm = {
+type TaskFormState = {
+  name: string;
+  description: string;
+  locationType: LocationType;
+  expectedLocation: string;
+  targetLatitude: number | undefined;
+  targetLongitude: number | undefined;
+  requiredEvidenceType: RequiredEvidenceType;
+  rewardAmount: string;
+  threshold: number;
+  expectedObject: string;
+};
+
+const defaultForm: TaskFormState = {
   name: "Verify EV Charger #21",
   description:
     "Confirm that EV Charger #21 is physically present and operational at the specified location.",
@@ -54,7 +67,7 @@ export function TaskForm({ editTask }: { editTask?: Task | null }) {
   const { address: sponsorWallet } = useWallet();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState(() =>
+  const [form, setForm] = useState<TaskFormState>(() =>
     editTask
       ? {
           name: editTask.name,
@@ -90,7 +103,7 @@ export function TaskForm({ editTask }: { editTask?: Task | null }) {
 
     try {
       if (editTask) {
-        await tasksApi.update(editTask.id, {
+        const updatePayload: TaskUpdateBody = {
           name: form.name,
           description: form.description,
           expectedLocation: form.expectedLocation,
@@ -101,7 +114,8 @@ export function TaskForm({ editTask }: { editTask?: Task | null }) {
           ...(form.locationType === "physical"
             ? { targetLatitude: form.targetLatitude, targetLongitude: form.targetLongitude }
             : { targetLatitude: null, targetLongitude: null }),
-        });
+        };
+        await tasksApi.update(editTask.id, updatePayload);
         toast("Task updated");
         router.push(`/tasks/${editTask.id}`);
         return;

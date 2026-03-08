@@ -13,6 +13,7 @@ export async function uploadProofImage(
 ): Promise<string | null> {
   if (!isSupabaseConfigured()) return null;
   const supabase = getSupabaseClient();
+  if (!supabase) return null;
   const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
   const name = pathPrefix
     ? `${pathPrefix}/${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${ext}`
