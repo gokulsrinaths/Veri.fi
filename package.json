@@ -6,7 +6,7 @@
     "dev": "pnpm run --parallel dev",
     "dev:web": "pnpm --filter web dev",
     "dev:api": "pnpm --filter api dev",
-    "build": "pnpm -r build",
+    "build": "pnpm run build:web",
     "build:web": "pnpm --filter web build",
     "build:api": "pnpm --filter api build",
     "build:contracts": "pnpm --filter contracts build",
