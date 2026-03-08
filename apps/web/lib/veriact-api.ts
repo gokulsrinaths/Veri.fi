@@ -46,8 +46,8 @@ export const tasksApi = {
     threshold: number;
     expectedObject: string;
     status: string;
-    targetLatitude: number;
-    targetLongitude: number;
+    targetLatitude: number | null;
+    targetLongitude: number | null;
     radiusMeters: number;
   }>) => api<unknown>(`/tasks/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
   delete: (id: string) => api<{ deleted: boolean }>(`/tasks/${id}`, { method: "DELETE" }),
