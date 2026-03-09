@@ -22,9 +22,6 @@ export function Footer() {
             <Link href="/how-it-works" className="text-sm text-zinc-400 hover:text-emerald-400 transition-colors">
               How it works
             </Link>
-            <Link href="/demo" className="text-sm text-zinc-400 hover:text-emerald-400 transition-colors">
-              Demo
-            </Link>
             <Link href="/tasks" className="text-sm text-zinc-400 hover:text-emerald-400 transition-colors">
               Explore Tasks
             </Link>

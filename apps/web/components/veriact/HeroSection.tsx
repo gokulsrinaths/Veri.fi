@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { PlusCircle, ListTodo, Zap } from "lucide-react";
+import { PlusCircle, ListTodo } from "lucide-react";
 
 const spring = { type: "spring", stiffness: 300, damping: 24 };
 const stagger = 0.12;
@@ -80,15 +80,8 @@ export function HeroSection() {
           className="flex flex-wrap justify-center gap-3 md:gap-4"
         >
           <Link
-            href="/demo"
-            className="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-xl font-semibold text-base transition-all duration-200 ease-out min-h-[48px] min-w-[48px] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98] hover:scale-[1.02] bg-emerald-500 text-zinc-950 shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30"
-          >
-            <Zap className="h-5 w-5 shrink-0" aria-hidden />
-            Try Demo
-          </Link>
-          <Link
             href="/tasks/create"
-            className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-xl font-medium text-base border border-zinc-600 text-zinc-200 transition-all duration-200 ease-out min-h-[48px] min-w-[48px] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98] hover:scale-[1.02] hover:bg-zinc-800/80 hover:border-emerald-500/40"
+            className="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-xl font-semibold text-base transition-all duration-200 ease-out min-h-[48px] min-w-[48px] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98] hover:scale-[1.02] bg-emerald-500 text-zinc-950 shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30"
           >
             <PlusCircle className="h-5 w-5 shrink-0" aria-hidden />
             Create Task

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { LayoutDashboard, ListTodo, PlusCircle, Menu, Zap, BookOpen, GitBranch } from "lucide-react";
+import { LayoutDashboard, ListTodo, PlusCircle, Menu, BookOpen, GitBranch } from "lucide-react";
 import { CreditcoinWallet } from "@/components/CreditcoinWallet";
 import { useWallet } from "@/components/WalletContext";
 import { Button } from "@/components/ui/button";
@@ -73,17 +73,6 @@ export function Navbar() {
     </Link>
   );
 
-  const demoLink = (
-    <Link
-      href="/demo"
-      className={linkClass(pathname === "/demo", true)}
-      onClick={() => setOpen(false)}
-    >
-      <Zap className="h-4 w-4 shrink-0" aria-hidden />
-      <span>Demo</span>
-    </Link>
-  );
-
   const protocolLink = (
     <Link
       href="/protocol"
@@ -126,7 +115,6 @@ export function Navbar() {
           {isConnected && dashboardLink}
           {exploreTasksLink}
           {createTaskLink}
-          {demoLink}
           <CreditcoinWallet />
         </div>
 
@@ -158,7 +146,6 @@ export function Navbar() {
                 {createTaskLink}
                 {protocolLink}
                 {howItWorksLink}
-                {demoLink}
                 <div className="pt-4 border-t border-zinc-800">
                   <CreditcoinWallet />
                 </div>

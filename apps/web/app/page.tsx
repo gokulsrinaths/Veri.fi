@@ -38,10 +38,10 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <Link
-              href="/demo"
+              href="/tasks/create"
               className="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-xl font-semibold bg-emerald-500 text-zinc-950 hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
             >
-              Try Demo
+              Create Task
             </Link>
             <Link
               href="/dashboard"

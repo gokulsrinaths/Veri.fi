@@ -29,7 +29,7 @@ export function DemoWalkthroughSection() {
         className="text-2xl md:text-3xl font-bold text-center mb-2"
         style={{ color: "#f4f4f5" }}
       >
-        Demo walkthrough
+        Get started
       </motion.h2>
       <motion.p
         variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0 } }}

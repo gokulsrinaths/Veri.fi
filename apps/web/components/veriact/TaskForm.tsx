@@ -344,7 +344,7 @@ export function TaskForm({ editTask }: { editTask?: Task | null }) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="task-expected-object">
-                Demo object being verified
+                Expected object being verified
               </Label>
               <Input
                 id="task-expected-object"
