@@ -59,13 +59,6 @@ export default function HomePage() {
             </div>
           )}
           <HomeConnectWallet />
-          <p className="mt-6 text-sm text-zinc-500">
-            Or{" "}
-            <Link href="/dashboard" className="text-emerald-400 underline hover:no-underline">
-              open dashboard
-            </Link>{" "}
-            and connect your wallet there.
-          </p>
         </section>
       </main>
     </div>

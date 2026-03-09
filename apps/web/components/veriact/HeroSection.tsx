@@ -82,7 +82,7 @@ export function HeroSection() {
           transition={spring}
           className="flex flex-wrap justify-center gap-3 md:gap-4"
         >
-          {isConnected ? (
+          {isConnected && (
             <>
               <Link
                 href="/tasks/create"
@@ -99,13 +99,6 @@ export function HeroSection() {
                 Explore Tasks
               </Link>
             </>
-          ) : (
-            <Link
-              href="#connect"
-              className="inline-flex items-center justify-center gap-2 h-12 px-8 rounded-xl font-semibold text-base transition-all duration-200 ease-out min-h-[48px] min-w-[48px] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98] hover:scale-[1.02] bg-emerald-500 text-zinc-950 shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30"
-            >
-              Log in
-            </Link>
           )}
         </motion.div>
         <motion.p
