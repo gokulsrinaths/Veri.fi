@@ -53,7 +53,7 @@ export function SolutionSection() {
             key={item.title}
             variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
             transition={spring}
-            className="rounded-xl border border-zinc-700/80 p-6 bg-zinc-900/50 hover:border-emerald-500/30 transition-colors"
+            className="rounded-xl border border-zinc-700/80 p-6 bg-zinc-900/50 hover:border-emerald-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/5"
           >
             <item.icon className="h-8 w-8 mb-3 text-emerald-400" aria-hidden />
             <h3 className="font-semibold text-foreground mb-2">{item.title}</h3>

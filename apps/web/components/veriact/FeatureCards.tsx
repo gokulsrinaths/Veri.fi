@@ -70,10 +70,8 @@ export function FeatureCards() {
               visible: { opacity: 1, y: 0 },
             }}
             transition={spring}
-            className="rounded-xl border border-zinc-700/80 p-6 h-full transition-colors hover:border-zinc-600/80"
+            className="rounded-xl border border-zinc-700/80 p-6 h-full transition-all duration-200 hover:border-zinc-600/80 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20"
             style={{ backgroundColor: "#18181b" }}
-          >
-            <item.icon
               className="h-8 w-8 mb-3"
               style={{ color: "#34d399" }}
               aria-hidden

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LayoutDashboard, ListTodo, PlusCircle, Menu, Zap, BookOpen, GitBranch } from "lucide-react";
 import { CreditcoinWallet } from "@/components/CreditcoinWallet";
 import { useWallet } from "@/components/WalletContext";
@@ -19,7 +19,14 @@ import { cn } from "@/lib/utils";
 export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { isConnected } = useWallet();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 16);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const linkClass = (active: boolean, isCta?: boolean) =>
     cn(
@@ -101,17 +108,18 @@ export function Navbar() {
 
   return (
     <nav
-      className="sticky top-0 z-40 border-b border-zinc-800 px-4 py-3"
-      style={{ backgroundColor: "#0a0a0a" }}
+      className={cn(
+        "sticky top-0 z-40 border-b px-4 py-3 transition-colors duration-200",
+        scrolled ? "border-zinc-800 bg-zinc-950/80 backdrop-blur-md" : "border-zinc-800 bg-zinc-950"
+      )}
       aria-label="Main navigation"
     >
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
         <Link
           href="/"
-          className="text-xl font-semibold tracking-tight px-2 py-1.5 rounded-lg hover:opacity-90"
-          style={{ color: "#f4f4f5" }}
+          className="text-xl font-semibold tracking-tight px-2 py-1.5 rounded-lg hover:opacity-90 text-zinc-50"
         >
-          veri<span style={{ color: "#34d399" }}>.fi</span>
+          veri<span className="text-emerald-400">.fi</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-2">
@@ -139,13 +147,12 @@ export function Navbar() {
             <SheetContent
               side="top"
               id="nav-sheet"
-              className="border-b border-zinc-800"
-              style={{ backgroundColor: "#0a0a0a" }}
+              className="border-b border-zinc-800 bg-zinc-950"
             >
               <SheetHeader>
                 <SheetTitle className="sr-only">Menu</SheetTitle>
               </SheetHeader>
-              <div className="flex flex-col gap-1 pt-6" style={{ color: "#f4f4f5" }}>
+              <div className="flex flex-col gap-1 pt-6 text-zinc-50">
                 {isConnected && dashboardLink}
                 {exploreTasksLink}
                 {createTaskLink}
