@@ -112,9 +112,13 @@ export function Navbar() {
         </Link>
 
         <div className="hidden md:flex items-center gap-2">
-          {isConnected && dashboardLink}
-          {exploreTasksLink}
-          {createTaskLink}
+          {isConnected && (
+            <>
+              {dashboardLink}
+              {exploreTasksLink}
+              {createTaskLink}
+            </>
+          )}
           <CreditcoinWallet />
         </div>
 
@@ -141,9 +145,13 @@ export function Navbar() {
                 <SheetTitle className="sr-only">Menu</SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-1 pt-6 text-zinc-50">
-                {isConnected && dashboardLink}
-                {exploreTasksLink}
-                {createTaskLink}
+                {isConnected && (
+                  <>
+                    {dashboardLink}
+                    {exploreTasksLink}
+                    {createTaskLink}
+                  </>
+                )}
                 {protocolLink}
                 {howItWorksLink}
                 <div className="pt-4 border-t border-zinc-800">
