@@ -15,6 +15,10 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "veri.fi — AI-verified proof of action on Creditcoin",
   description: "Turn real-world activity into programmable proof. Create tasks, submit proof, get verified.",
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({
