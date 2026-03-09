@@ -13,6 +13,10 @@
   <sub>Built for <strong>BUIDL CTC Hackathon</strong> — Build for the Real World</sub>
 </p>
 
+<p align="center">
+  <strong>Live:</strong> <a href="https://veri-fi-sepia.vercel.app/">veri-fi-sepia.vercel.app</a>
+</p>
+
 ---
 
 ## ✨ What it is
@@ -67,6 +71,8 @@ Monorepo: `apps/web` (main app), `packages/contracts` (Solidity).
 ---
 
 ## 🌐 Deploy frontend (Vercel)
+
+Current production deployment: **https://veri-fi-sepia.vercel.app/**
 
 1. Push the repo to GitHub.
 2. [vercel.com](https://vercel.com) → **Add New** → **Project** → import repo.
